@@ -12,12 +12,9 @@ local characterMap = {
     -- Bottom row (next priority)
     'z', 'x', 'c', 'v','b', 'n', 'm'
     -- Other common symbols
-
-    -- Numbers (lowest priority)
 }
-local doublCharactermap = {';',',','.'}
 
-local ns = vim.api.nvim_create_namespace('KeyJumper')
+local ns = vim.api.nvim_create_namespace('easypeasy')
 
 function M.getWindowContextInfo()
 
@@ -79,57 +76,57 @@ function M.findKeyLocationsInViewPort(key)
 end
 
 
-
 function M.calculateReplacementCharacters(jumpLocationInfo)
     local firstLine = jumpLocationInfo.windowInfo.first_line
     local cursorPosLine = jumpLocationInfo.windowInfo.cursor_pos[1] - firstLine --make relative to viewport
     local cursorPosCol = jumpLocationInfo.windowInfo.cursor_pos[2]
     local replacementChars = {}
-    -- print("")
-    -- print(vim.inspect(jumpLocationInfo.locations))
 
-    -- sort line numbers closest to the cursor first
     table.sort(jumpLocationInfo.locations, function(a, b)
         local distA = math.abs(a[1] - cursorPosLine)
         local distB = math.abs(b[1] - cursorPosLine)
         return distA < distB
     end)
 
-    -- sort characters on the line main line
-    -- for _, charArray in pairs(jumpLocationInfo.charColNums)do
-    -- end
-    --
-    -- print("cursorPosLine" .. cursorPosLine)
-    -- print("cursorPoscCol" .. cursorPosCol)
-    -- print(vim.inspect(jumpLocationInfo.locations))
-
     local counter = 1
     for i, location in ipairs(jumpLocationInfo.locations) do
         local relLineNum = location[1]
         local absLineNum = firstLine + relLineNum - 1
         local charColNums = location[2]
+
         for j, colNum in ipairs(charColNums) do
-            local cmIndex = math.fmod(counter -1 , #characterMap) + 1
-            local replacementString = characterMap[cmIndex]
-            print(replacementString)
-            print(cmIndex)
-            local numPrefixes = math.floor(counter / #characterMap)
-            if numPrefixes > 0 then
-                for k = 1, numPrefixes do
-                    replacementString = doublCharactermap[k] .. replacementString
-                end
-            end
+            local replacementString = M.generate_replacement_string(counter)
             table.insert(replacementChars,
-            {
-                lineNum = absLineNum,
-                colNum = colNum,
-                replacementString = replacementString
-            })
+                {
+                    lineNum = absLineNum,
+                    colNum = colNum,
+                    replacementString = replacementString
+                })
             counter = counter + 1
         end
     end
     jumpLocationInfo.locations = replacementChars
     return jumpLocationInfo
+end
+
+function M.generate_replacement_string(counter)
+    local chars = vim.deepcopy(characterMap)  -- Clone to avoid mutation
+    local result = ""
+    counter = counter - 1  -- 0-based index
+
+    while #chars > 0 and counter >= 0 do
+        -- Select current character
+        local idx = (counter % #chars) + 1
+        result = result .. chars[idx]
+
+        -- Remove used character from available options
+        table.remove(chars, idx)
+
+        -- Move to next "digit" place
+        counter = math.floor(counter / #chars)
+    end
+
+    return result
 end
 
 function M.highlightLocations(jumpLocationInfo)
@@ -148,13 +145,18 @@ function M.highlightLocations(jumpLocationInfo)
             charNumber - 1,
             {
                 hl_group = 'Search',
-                end_col = charNumber,  -- Highlight end column
-                virt_text = {{replacementString, 'Search'}},  -- Replacement char
-                virt_text_pos = 'overlay',  -- Display over existing text
+                end_col = charNumber,
+                virt_text = {{replacementString, 'Search'}},
+                virt_text_pos = 'overlay',
                 priority = 1000,
             }
         )
     end
+    vim.schedule(function()
+        vim.cmd("mode")
+        vim.cmd("redraw!")
+    end)
+    return jumpLocationInfo
 end
 
 
@@ -162,11 +164,21 @@ function M.sortCharactersInOrderOfPrecidence(jumpLocationInfo)
 
 end
 
-function M.jumpToKey(location)
+function M.jumpToKey(jumpLocationInfo)
+    local char = vim.fn.getchar()
+    local key = vim.fn.nr2char(char)
+    local finalCursorLocation = jumpLocationInfo.windowInfo.cursor_pos
+    for i, location in ipairs(jumpLocationInfo.locations) do
+        if location.replacementString == key  then
+            finalCursorLocation = {location.lineNum, location.colNum - 1}
+        end
+    end
+    vim.api.nvim_win_set_cursor(0, finalCursorLocation)
+    M.clearHighlights()
 end
 
 function M.runSingleChar()
-    M.highlightLocations(M.calculateReplacementCharacters(M.findKeyLocationsInViewPort(M.askForKey())))
+    M.jumpToKey(M.highlightLocations(M.calculateReplacementCharacters(M.findKeyLocationsInViewPort(M.askForKey()))))
 end
 
 vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
