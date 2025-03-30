@@ -81,34 +81,51 @@ end
 
 
 function M.calculateReplacementCharacters(jumpLocationInfo)
-    local cursorPosLine = jumpLocationInfo.windowInfo.cursor_pos[1]
-    local cursorPosCol = jumpLocationInfo.windowInfo.cursor_pos[2]
     local firstLine = jumpLocationInfo.windowInfo.first_line
+    local cursorPosLine = jumpLocationInfo.windowInfo.cursor_pos[1] - firstLine --make relative to viewport
+    local cursorPosCol = jumpLocationInfo.windowInfo.cursor_pos[2]
     local replacementChars = {}
+    -- print("")
+    -- print(vim.inspect(jumpLocationInfo.locations))
 
+    -- sort line numbers closest to the cursor first
     table.sort(jumpLocationInfo.locations, function(a, b)
-        local distA = math.abs((firstLine + a[1] - 1) - cursorPosLine) + math.abs(a[2][1] - cursorPosCol)
-        local distB = math.abs((firstLine + b[1] - 1) - cursorPosLine) + math.abs(b[2][1] - cursorPosCol)
+        local distA = math.abs(a[1] - cursorPosLine)
+        local distB = math.abs(b[1] - cursorPosLine)
         return distA < distB
     end)
 
-    for _, location in ipairs(jumpLocationInfo.locations) do
-        print(location.linenumber, location.charColNums)
-    end
+    -- sort characters on the line main line
+    -- for _, charArray in pairs(jumpLocationInfo.charColNums)do
+    -- end
+    --
+    -- print("cursorPosLine" .. cursorPosLine)
+    -- print("cursorPoscCol" .. cursorPosCol)
+    -- print(vim.inspect(jumpLocationInfo.locations))
 
-
-    for _, location in ipairs(jumpLocationInfo.locations) do
+    local counter = 1
+    for i, location in ipairs(jumpLocationInfo.locations) do
         local relLineNum = location[1]
         local absLineNum = firstLine + relLineNum - 1
         local charColNums = location[2]
-        for _, colNum in ipairs(charColNums) do
-            local charCode = 97
+        for j, colNum in ipairs(charColNums) do
+            local cmIndex = math.fmod(counter -1 , #characterMap) + 1
+            local replacementString = characterMap[cmIndex]
+            print(replacementString)
+            print(cmIndex)
+            local numPrefixes = math.floor(counter / #characterMap)
+            if numPrefixes > 0 then
+                for k = 1, numPrefixes do
+                    replacementString = doublCharactermap[k] .. replacementString
+                end
+            end
             table.insert(replacementChars,
             {
                 lineNum = absLineNum,
                 colNum = colNum,
-                char = string.char(charCode)
+                replacementString = replacementString
             })
+            counter = counter + 1
         end
     end
     jumpLocationInfo.locations = replacementChars
@@ -121,7 +138,8 @@ function M.highlightLocations(jumpLocationInfo)
     for _, location in pairs(jumpLocationInfo.locations) do
         local abs_linenum = location.lineNum
         local charNumber = location.colNum
-        local replacementChar = location.char
+        local replacementString = location.replacementString
+        -- print (replacementString)
 
         vim.api.nvim_buf_set_extmark(
             buf,
@@ -131,7 +149,7 @@ function M.highlightLocations(jumpLocationInfo)
             {
                 hl_group = 'Search',
                 end_col = charNumber,  -- Highlight end column
-                virt_text = {{replacementChar, 'Search'}},  -- Replacement char
+                virt_text = {{replacementString, 'Search'}},  -- Replacement char
                 virt_text_pos = 'overlay',  -- Display over existing text
                 priority = 1000,
             }
@@ -151,6 +169,7 @@ function M.runSingleChar()
     M.highlightLocations(M.calculateReplacementCharacters(M.findKeyLocationsInViewPort(M.askForKey())))
 end
 
+vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
 vim.keymap.set('n', '<leader>1', M.runSingleChar)
 vim.keymap.set('n', '<leader>2', M.clearHighlights)
 --z
