@@ -5,12 +5,9 @@ function M.setup()
 end
 
 local characterMap = {
-    -- Home row (highest priority)
-    'a', 's', 'd', 'f', 'g','h', 'j', 'k', 'l', ';',
-    -- Top row (next priority)
-    'q', 'w', 'e', 'r', 't', 'y','u', 'i', 'o', 'p',
-    -- Bottom row (next priority)
-    'z', 'x', 'c', 'v','b', 'n', 'm'
+    'a', 's', 'd', 'g', 'h','k', 'l', 'q', 'w', 'e',
+    'r', 't', 'y', 'u', 'i', 'o','p', 'z', 'x', 'c',
+    'v', 'b', 'n', 'm','f', 'j', ';'
     -- Other common symbols
 }
 
@@ -53,7 +50,8 @@ function M.findKeyLocationsInViewPort(key)
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local jumpLocationInfo = {
         locations = {},
-        windowInfo = windowInfo
+        windowInfo = windowInfo,
+        numMatches = 0
     }
 
     for linenumber, line in ipairs(lines) do
@@ -62,6 +60,7 @@ function M.findKeyLocationsInViewPort(key)
             local lineKey = line:sub(charColNum,charColNum)
             if lineKey == key then
                 table.insert(charColNums, charColNum)
+                jumpLocationInfo.numMatches = jumpLocationInfo.numMatches + 1
             end
         end
         if #charColNums > 0 then
@@ -93,9 +92,10 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
         local relLineNum = location[1]
         local absLineNum = firstLine + relLineNum - 1
         local charColNums = location[2]
+        print("------------------------------------counter lines: " .. counter)
 
         for j, colNum in ipairs(charColNums) do
-            local replacementString = M.generate_replacement_string(counter)
+            local replacementString = M.generate_replacement_string(counter, jumpLocationInfo.numMatches)
             table.insert(replacementChars,
                 {
                     lineNum = absLineNum,
@@ -109,24 +109,50 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
     return jumpLocationInfo
 end
 
-function M.generate_replacement_string(counter)
-    local chars = vim.deepcopy(characterMap)  -- Clone to avoid mutation
-    local result = ""
-    counter = counter - 1  -- 0-based index
+function M.generate_replacement_string(counter, numMatches)
+    local chars = characterMap
+    local numChars = #chars
+    local numPrefixChars = math.floor(numMatches / numChars)
 
-    while #chars > 0 and counter >= 0 do
-        -- Select current character
-        local idx = (counter % #chars) + 1
-        result = result .. chars[idx]
+    local prefixChars = {}
+    local regularChars = {}
 
-        -- Remove used character from available options
-        table.remove(chars, idx)
-
-        -- Move to next "digit" place
-        counter = math.floor(counter / #chars)
+    for i = 1, numChars - numPrefixChars do
+        table.insert(regularChars, chars[i])
     end
 
-    return result
+    for i =  numChars - numPrefixChars,  numChars - 1 do
+        table.insert(prefixChars, chars[i])
+    end
+
+    print(vim.inspect(regularChars))
+    print(vim.inspect(prefixChars))
+
+    local numRegularChars = #regularChars
+    --eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+
+    local iter = math.floor(counter/ numRegularChars)
+    local counterWrap = (counter % (numRegularChars)) + 1
+    local returnString = regularChars[counterWrap]
+    print ("------------------------------")
+    print ("numMatches:" .. numMatches)
+    print ("numChars: " .. numChars)
+    print ("numPrefixChars: " .. numPrefixChars)
+    print ("prefixChars: " .. #prefixChars)
+    print ("regularChars: " .. #regularChars)
+    print ("numRegularChars: " .. numRegularChars)
+    print ("counter: " .. counter)
+    print ("iter: " .. iter)
+    print ("counterWrap: " .. counterWrap)
+    print ("returnString: " .. returnString)
+    print("------------------------------")
+    if iter > 0 then
+        returnString = prefixChars[iter] .. returnString
+    end
+    return returnString
+
+    -- z      z
+
 end
 
 function M.highlightLocations(jumpLocationInfo)
