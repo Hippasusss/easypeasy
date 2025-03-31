@@ -1,6 +1,7 @@
 print ("loaded easy peasy")
 local M = {}
 
+
 function M.setup()
 end
 
@@ -92,7 +93,6 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
         local relLineNum = location[1]
         local absLineNum = firstLine + relLineNum - 1
         local charColNums = location[2]
-        print("------------------------------------counter lines: " .. counter)
 
         for j, colNum in ipairs(charColNums) do
             local replacementString = M.generate_replacement_string(counter, jumpLocationInfo.numMatches)
@@ -112,48 +112,44 @@ end
 function M.generate_replacement_string(counter, numMatches)
     local chars = characterMap
     local numChars = #chars
-    local numPrefixChars = math.floor(numMatches / numChars)
 
+    -- Calculate character distribution
+    local numPrefixChars = math.min(math.floor(numMatches / numChars), numChars - 1)
+    local numRegularChars = numChars - numPrefixChars
+
+    -- Build character tables
     local prefixChars = {}
     local regularChars = {}
 
-    for i = 1, numChars - numPrefixChars do
-        table.insert(regularChars, chars[i])
+    for i = 1, numRegularChars do
+        regularChars[i] = chars[i]
     end
 
-    for i =  numChars - numPrefixChars,  numChars - 1 do
-        table.insert(prefixChars, chars[i])
+    for i = 1, numPrefixChars do
+        prefixChars[i] = chars[numRegularChars + i]
     end
 
-    print(vim.inspect(regularChars))
-    print(vim.inspect(prefixChars))
+    -- Calculate positions
+    local iter = math.floor(counter / numRegularChars)
+    local char_idx = (counter % numRegularChars) + 1
 
-    local numRegularChars = #regularChars
-    --eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-
-    local iter = math.floor(counter/ numRegularChars)
-    local counterWrap = (counter % (numRegularChars)) + 1
-    local returnString = regularChars[counterWrap]
-    print ("------------------------------")
-    print ("numMatches:" .. numMatches)
-    print ("numChars: " .. numChars)
-    print ("numPrefixChars: " .. numPrefixChars)
-    print ("prefixChars: " .. #prefixChars)
-    print ("regularChars: " .. #regularChars)
-    print ("numRegularChars: " .. numRegularChars)
-    print ("counter: " .. counter)
-    print ("iter: " .. iter)
-    print ("counterWrap: " .. counterWrap)
-    print ("returnString: " .. returnString)
-    print("------------------------------")
-    if iter > 0 then
-        returnString = prefixChars[iter] .. returnString
+    -- Construct return string
+    local result = regularChars[char_idx]
+    if iter > 0 and iter <= #prefixChars then
+        result = prefixChars[iter] .. result
     end
-    return returnString
 
-    -- z      z
-
+    return result
 end
+
+vim.api.nvim_set_hl(0, 'EasyPeasyMain', {
+    fg = '#D6281C',
+    bold = true,
+})
+vim.api.nvim_set_hl(0, 'EasyPeasySecondary', {
+    fg = '#b35d27',
+    bold = true,
+})
 
 function M.highlightLocations(jumpLocationInfo)
     local buf = jumpLocationInfo.buffer or 0
@@ -162,17 +158,17 @@ function M.highlightLocations(jumpLocationInfo)
         local abs_linenum = location.lineNum
         local charNumber = location.colNum
         local replacementString = location.replacementString
-        -- print (replacementString)
 
+        --TODO: colour the secondary characters 
         vim.api.nvim_buf_set_extmark(
             buf,
             ns,
             abs_linenum - 1,
             charNumber - 1,
             {
-                hl_group = 'Search',
+                hl_group = 'EasyPeasy',
                 end_col = charNumber,
-                virt_text = {{replacementString, 'Search'}},
+                virt_text = {{replacementString, 'EasyPeasy'}},
                 virt_text_pos = 'overlay',
                 priority = 1000,
             }
@@ -190,26 +186,46 @@ function M.sortCharactersInOrderOfPrecidence(jumpLocationInfo)
 
 end
 
+-- also reduces match (then recurses) and calls to update highlighting
 function M.jumpToKey(jumpLocationInfo)
     local char = vim.fn.getchar()
     local key = vim.fn.nr2char(char)
     local finalCursorLocation = jumpLocationInfo.windowInfo.cursor_pos
-    for i, location in ipairs(jumpLocationInfo.locations) do
-        if location.replacementString == key  then
-            finalCursorLocation = {location.lineNum, location.colNum - 1}
+    local filteredLocations = {}
+
+    for _, location in ipairs(jumpLocationInfo.locations) do
+        if string.sub(location.replacementString, 1, 1) == key then
+            if (string.len(location.replacementString) == 1) then
+                vim.api.nvim_win_set_cursor(0, {location.lineNum, location.colNum - 1})
+                return
+            else
+                location.replacementString = string.sub(location.replacementString, 2)
+                table.insert(filteredLocations, location)
+            end
         end
     end
-    vim.api.nvim_win_set_cursor(0, finalCursorLocation)
-    M.clearHighlights()
+    jumpLocationInfo.locations = filteredLocations
+    jumpLocationInfo.numMatches = #filteredLocations
+
+    if #filteredLocations == 1 and string.len(filteredLocations[1].replacementString) == 0 then
+        vim.api.nvim_win_set_cursor(0, {filteredLocations[1].lineNum, filteredLocations[1].colNum - 1})
+    elseif #filteredLocations > 0 then
+        M.clearHighlights()
+        M.highlightLocations(jumpLocationInfo)
+        M.jumpToKey(jumpLocationInfo)
+        return
+    end
+
 end
 
 function M.runSingleChar()
+    -- TODO: don't do this it's grossw
     M.jumpToKey(M.highlightLocations(M.calculateReplacementCharacters(M.findKeyLocationsInViewPort(M.askForKey()))))
+    M.clearHighlights()
 end
 
 vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
 vim.keymap.set('n', '<leader>1', M.runSingleChar)
 vim.keymap.set('n', '<leader>2', M.clearHighlights)
---z
 return M
 
