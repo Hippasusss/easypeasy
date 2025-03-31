@@ -7,4 +7,10 @@ function M.askForKey(message)
     return key
 end
 
+local ns = vim.api.nvim_create_namespace('interactive_search')
+local search_hl = vim.api.nvim_buf_add_highlight
+
+function M.askForString(message)
+end
+
 return M

@@ -6,7 +6,7 @@ local input = require("input")
 
 local M = {}
 
-function M.runSingleChar()
+function M.searchSingleCharacter()
     local key = input.askForKey("Search For Key: ")
     highlight.toggle_grey_text()
     highlight.clearHighlights()
@@ -15,8 +15,24 @@ function M.runSingleChar()
     highlight.toggle_grey_text()
 end
 
+function M.searchMultipleCharacters()
+    input.askForString("Search")
+    highlight.toggle_grey_text()
+    highlight.clearHighlights()
+    -- jump.jumpToKey(highlight.highlightLocations(replace.calculateReplacementCharacters()))
+    highlight.clearHighlights()
+    highlight.toggle_grey_text()
+end
+
+function M.searchLines()
+end
+
+function M.searchTreesitter()
+end
+
 vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
-vim.keymap.set('n', 's', M.runSingleChar)
+vim.keymap.set('n', 's', M.searchSingleCharacter)
+vim.keymap.set('n', '/', M.searchMultipleCharacters)
 vim.keymap.set('n', '<leader>2', highlight.clearHighlights)
 print("loaded easy peasy")
 
