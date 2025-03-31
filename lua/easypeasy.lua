@@ -88,7 +88,7 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
         return distA < distB
     end)
 
-    local counter = 1
+    local counter = 0
     for i, location in ipairs(jumpLocationInfo.locations) do
         local relLineNum = location[1]
         local absLineNum = firstLine + relLineNum - 1
@@ -132,6 +132,7 @@ function M.generate_replacement_string(counter, numMatches)
     -- Calculate positions
     local iter = math.floor(counter / numRegularChars)
     local char_idx = (counter % numRegularChars) + 1
+    print (char_idx)
 
     -- Construct return string
     local result = regularChars[char_idx]
@@ -155,35 +156,47 @@ function M.highlightLocations(jumpLocationInfo)
     local buf = jumpLocationInfo.buffer or 0
 
     for _, location in pairs(jumpLocationInfo.locations) do
-        local abs_linenum = location.lineNum
+        local absLinenum = location.lineNum
         local charNumber = location.colNum
         local replacementString = location.replacementString
+        local firstChar = replacementString:sub(1, 1)
+        local restChars = replacementString:sub(2)
 
-        --TODO: colour the secondary characters 
         vim.api.nvim_buf_set_extmark(
             buf,
             ns,
-            abs_linenum - 1,
+            absLinenum - 1,
             charNumber - 1,
             {
-                hl_group = 'EasyPeasy',
+                hl_group = 'EasyPeasyMain',
                 end_col = charNumber,
-                virt_text = {{replacementString, 'EasyPeasy'}},
+                virt_text = {{firstChar, 'EasyPeasyMain'}},
                 virt_text_pos = 'overlay',
                 priority = 1000,
             }
         )
+
+        if #restChars > 0 then
+            vim.api.nvim_buf_set_extmark(
+                buf,
+                ns,
+                absLinenum - 1,
+                charNumber,
+                {
+                    hl_group = 'EasyPeasySecondary',
+                    end_col = charNumber,
+                    virt_text = {{restChars, 'EasyPeasySecondary'}},
+                    virt_text_pos = 'overlay',
+                    priority = 1000,
+                }
+            )
+        end
     end
     vim.schedule(function()
         vim.cmd("mode")
         vim.cmd("redraw!")
     end)
     return jumpLocationInfo
-end
-
-
-function M.sortCharactersInOrderOfPrecidence(jumpLocationInfo)
-
 end
 
 -- also reduces match (then recurses) and calls to update highlighting
