@@ -1,15 +1,9 @@
-print ("loaded easy peasy")
 local M = {}
-
-
-function M.setup()
-end
 
 local characterMap = {
     'a', 's', 'd', 'g', 'h','k', 'l', 'q', 'w', 'e',
     'r', 't', 'y', 'u', 'i', 'o','p', 'z', 'x', 'c',
     'v', 'b', 'n', 'm','f', 'j', ';'
-    -- Other common symbols
 }
 
 local ns = vim.api.nvim_create_namespace('easypeasy')
@@ -237,8 +231,10 @@ function M.runSingleChar()
     M.clearHighlights()
 end
 
-vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
-vim.keymap.set('n', '<leader>1', M.runSingleChar)
-vim.keymap.set('n', '<leader>2', M.clearHighlights)
+-- vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
+-- vim.keymap.set('n', '<leader>1', M.runSingleChar)
+-- vim.keymap.set('n', '<leader>2', M.clearHighlights)
+-- print("loaded easy peasy")
+
 return M
 
