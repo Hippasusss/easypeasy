@@ -16,7 +16,7 @@ function M.searchSingleCharacter()
 end
 
 function M.searchMultipleCharacters()
-    input.askForString("Search")
+    input.askForString("Search: ")
     highlight.toggle_grey_text()
     highlight.clearHighlights()
     -- jump.jumpToKey(highlight.highlightLocations(replace.calculateReplacementCharacters()))
@@ -30,11 +30,11 @@ end
 function M.searchTreesitter()
 end
 
-vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
-vim.keymap.set('n', 's', M.searchSingleCharacter)
-vim.keymap.set('n', '/', M.searchMultipleCharacters)
-vim.keymap.set('n', '<leader>2', highlight.clearHighlights)
-print("loaded easy peasy")
+-- vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
+-- vim.keymap.set('n', 's', M.searchSingleCharacter)
+-- vim.keymap.set('n', '/', M.searchMultipleCharacters)
+-- vim.keymap.set('n', '<leader>2', highlight.clearHighlights)
+-- print("loaded easy peasy")
 
 return M
 
