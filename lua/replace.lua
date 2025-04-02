@@ -62,14 +62,13 @@ function M.generate_replacement_string(counter, numMatches)
     -- Calculate positions
     local iter = math.floor(counter / numRegularChars)
     local char_idx = (counter % numRegularChars) + 1
-    print (char_idx)
 
     -- Construct return string
     local result = regularChars[char_idx]
     if iter > 0 and iter <= #prefixChars then
         result = prefixChars[iter] .. result
     end
-
     return result
 end
+print("loaded Replace")
 return M

@@ -1,5 +1,6 @@
 local M = {}
-function M.findKeyLocationsInViewPort(key)
+
+function M.getWindowinfo()
     local windowInfo =
     {
         win = vim.api.nvim_get_current_win(),
@@ -8,7 +9,18 @@ function M.findKeyLocationsInViewPort(key)
         last_line = vim.fn.line('w$', vim.api.nvim_get_current_win()),
         cursor_pos = vim.api.nvim_win_get_cursor(0),
     }
+    return windowInfo
+end
 
+function M.createJumpLocations(locations, numMatches)
+    return {
+        locations = locations,
+        windowInfo = M.getWindowinfo(),
+        numMatches = numMatches}
+end
+
+function M.findKeyLocationsInViewPort(key)
+    local windowInfo = M.getWindowinfo()
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local jumpLocationInfo = {
         locations = {},
