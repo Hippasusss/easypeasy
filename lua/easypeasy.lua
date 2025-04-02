@@ -6,8 +6,8 @@ local input = require("input")
 
 local M = {}
 
---TODO: fix no match
---TODO: 
+--FIXME: fix no match return without dimming
+--FIXME: fix jump.lua 27 attempt to cal field highlightLocatoins (nil) for two key replacement
 function M.searchSingleCharacter()
     local key = input.askForKey("Search For Key: ")
     highlight.toggle_grey_text()
@@ -17,6 +17,12 @@ function M.searchSingleCharacter()
     highlight.toggle_grey_text()
 end
 
+--FIXME: fix backspaceing to no characters leaves one highlighted
+--FIXME: fix pcall retrning ok even when esape is hit
+--FIXME: fix enter without match needs another enter press
+--FIXME: fix very occasionally there is an out of range for the line number and col number for the replacement Chars
+--TODO: Tab to next page of searches
+--TODO: Automatically page down/up if no matches on current page
 function M.searchMultipleCharacters()
     highlight.toggle_grey_text()
     highlight.clearHighlights()
