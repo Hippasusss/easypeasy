@@ -7,17 +7,20 @@ local helper = require("helper")
 
 local M = {}
 
---FIXME: fix no match return without dimming
 --FIXME: fix jump.lua 27 attempt to cal field highlightLocatoins (nil) for two key replacement
 function M.searchSingleCharacter()
     local key = input.askForKey("Search For Key: ")
     highlight.toggle_grey_text()
     highlight.clearHighlights()
-    jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters(select.findKeyLocationsInViewPort(key))))
+    local locations = select.findKeyLocationsInViewPort(key)
+    if #locations > 0 then
+        jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters()))
+    end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
 end
 
+--FIXME: should insta jump if there's only one match
 --FIXME: fix pcall retrning ok even when esape is hit
 --FIXME: fix enter without match needs another enter press
 --FIXME: fix very occasionally there is an out of range for the line number and col number for the replacement Chars
