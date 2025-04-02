@@ -109,7 +109,6 @@ function M.clearHighlights()
 end
 
 function M.InteractiveSearch()
-    local ns = vim.api.nvim_create_namespace('InteractiveSearchHL')
     local buf = vim.api.nvim_get_current_buf()
     local query = ''
     local matches = {}
@@ -147,8 +146,8 @@ function M.InteractiveSearch()
             vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
             matches = {}
 
-            local ok, regex = pcall(vim.regex, query)
-            if ok and regex then
+            local ok2, regex = pcall(vim.regex, query)
+            if ok2 and regex then
                 local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
                 for lnum, line in ipairs(lines) do
                     local start_idx = 0

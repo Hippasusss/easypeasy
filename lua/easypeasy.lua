@@ -3,6 +3,7 @@ local select = require("select")
 local replace = require("replace")
 local jump = require("jump")
 local input = require("input")
+local helper = require("helper")
 
 local M = {}
 
@@ -29,9 +30,9 @@ function M.searchMultipleCharacters()
     local replacementLocations = highlight.InteractiveSearch()
     local window = select.getWindowinfo()
     local jumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
-    local ok, replacementLocations = pcall(replace.calculateReplacementCharacters, jumplocations)
+    local ok, replacementLocationsWithCharacters = pcall(replace.calculateReplacementCharacters, jumplocations)
     if ok then
-        jump.jumpToKey(highlight.highlightJumpLocations(replacementLocations))
+        jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
@@ -42,21 +43,7 @@ end
 
 function M.searchTreesitter()
 end
-function DebugBackspace()
-  print("Press backspace (then Escape to exit)")
-  while true do
-    local char = vim.fn.getchar()
-    if type(char) == 'number' then
-      print(string.format("Received numeric code: %d (hex: 0x%x)", char, char))
-    else
-      print("Received string: "..vim.inspect(char))
-    end
-    if char == 27 then break end  -- Escape exits
-  end
-end
 
--- Create command to test it
-vim.api.nvim_create_user_command('DebugKeys', DebugBackspace, {})
 
 vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
 vim.keymap.set('n', 's', M.searchSingleCharacter)
