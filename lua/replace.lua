@@ -7,6 +7,8 @@ M.characterMap = {
 }
 
 function M.calculateReplacementCharacters(jumpLocationInfo)
+    if jumpLocationInfo == nil then return nil end
+
     local firstLine = jumpLocationInfo.windowInfo.first_line
     local cursorPosLine = jumpLocationInfo.windowInfo.cursor_pos[1] - firstLine --make relative to viewport
     local cursorPosCol = jumpLocationInfo.windowInfo.cursor_pos[2]
@@ -70,5 +72,4 @@ function M.generate_replacement_string(counter, numMatches)
     end
     return result
 end
-print("loaded Replace")
 return M

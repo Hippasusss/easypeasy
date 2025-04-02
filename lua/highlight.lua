@@ -4,7 +4,7 @@ M.original_hl = vim.api.nvim_get_hl(0, { name = 'Normal' })
 M.fadedKeyColor = '#808080'
 M.primarySelectorKeyColor = '#D6281C'
 M.secondarySelectorKeyColor = '#B35D27'
-M.secondarySelectorKeyColor = '#99F78B'
+M.searchMatchColor = '#99F78B'
 
 vim.api.nvim_set_hl(0, 'EasyPeasyMain', {
     fg = M.primarySelectorKeyColor,
@@ -15,7 +15,7 @@ vim.api.nvim_set_hl(0, 'EasyPeasySecondary', {
     bold = true,
 })
 vim.api.nvim_set_hl(0, 'EasyPeasySearch', {
-    fg = M.secondarySelectorKeyColor,
+    fg = M.searchMatchColor,
     bold = true,
 })
 
@@ -38,6 +38,9 @@ function M.highlightJumpLocations(jumpLocationInfo)
         local replacementString = location.replacementString
         local firstChar = replacementString:sub(1, 1)
         local restChars = replacementString:sub(2)
+	    -- print("highlight.highlightJumpLocations():")
+	    -- print(vim.inspect(location))
+	    -- print(" ")
 
         vim.api.nvim_buf_set_extmark(
             buf,
@@ -124,20 +127,18 @@ function M.InteractiveSearch()
 
         local char_str = type(char) == 'number' and vim.fn.nr2char(char) or char
         local normalized = vim.fn.keytrans(tostring(char_str))
-        print(vim.inspect(normalized))
 
         if normalized == '<CR>' then
             break
         elseif normalized == '<Esc>'then
             vim.api.nvim_echo({{'Search cancelled', 'WarningMsg'}}, true, {})
-            print("escaped")
             M.toggle_grey_text()
+            vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
             return nil
 
         elseif normalized == '<Tab>'then
         elseif normalized == '<BS>' then
             query = query:sub(1, -2)
-            print("Back")
         else
             query = query .. vim.fn.nr2char(char)
         end

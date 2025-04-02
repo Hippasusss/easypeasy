@@ -1,6 +1,6 @@
 local M = {}
 
-function M.getWindowinfo()
+function M.getWindowInfo()
     local windowInfo =
     {
         win = vim.api.nvim_get_current_win(),
@@ -15,12 +15,19 @@ end
 function M.createJumpLocations(locations, numMatches)
     return {
         locations = locations,
-        windowInfo = M.getWindowinfo(),
+        windowInfo = M.getWindowInfo(),
         numMatches = numMatches}
 end
 
+function M.makeAbsoluteLocationsRelative(jumpLocationInfo)
+    for _, location in pairs(jumpLocationInfo.locations) do
+        location[1] = location[1] - jumpLocationInfo.windowInfo.first_line + 1
+    end
+    return jumpLocationInfo
+end
+
 function M.findKeyLocationsInViewPort(key)
-    local windowInfo = M.getWindowinfo()
+    local windowInfo = M.getWindowInfo()
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local jumpLocationInfo = {
         locations = {},
@@ -48,7 +55,4 @@ function M.findKeyLocationsInViewPort(key)
     return jumpLocationInfo
 end
 
-function M.getSelection()
-    --TODO: slash selection search
-end
 return M

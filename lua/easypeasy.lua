@@ -15,25 +15,26 @@ function M.searchSingleCharacter()
     if #jumpLocationInfo.locations > 0 then
         jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters(jumpLocationInfo)))
     else
+	vim.api.nvim_echo({{'No Matches!', 'WarningMsg'}}, true, {})
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
 end
 
---FIXME: should insta jump if there's only one match
---FIXME: fix pcall retrning ok even when esape is hit
+--FIXME: fix error on esacpe
 --FIXME: fix enter without match needs another enter press
---FIXME: fix very occasionally there is an out of range for the line number and col number for the replacement Chars
 --TODO: Tab to next page of searches
 --TODO: Automatically page down/up if no matches on current page
 function M.searchMultipleCharacters()
     highlight.toggle_grey_text()
     highlight.clearHighlights()
     local replacementLocations = highlight.InteractiveSearch()
-    local window = select.getWindowinfo()
-    local jumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
-    local ok, replacementLocationsWithCharacters = pcall(replace.calculateReplacementCharacters, jumplocations)
-    if ok then
+    local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
+    local relativeJumplocations = select.makeAbsoluteLocationsRelative(bufferJumplocations)
+    print("================================")
+    print(vim.inspect(relativeJumplocations))
+    local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(relativeJumplocations)
+    if replacementLocationsWithCharacters then
         jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
     end
     highlight.clearHighlights()
@@ -47,7 +48,7 @@ function M.searchTreesitter()
 end
 
 
-vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
+-- vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
 vim.keymap.set('n', 's', M.searchSingleCharacter)
 vim.keymap.set('n', '<space>', M.searchMultipleCharacters)
 vim.keymap.set('n', '<leader>2', highlight.clearHighlights)
