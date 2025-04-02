@@ -177,6 +177,8 @@ function M.InteractiveSearch()
                     end
                 end
             end
+        else
+            vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
         end
 
         vim.api.nvim_echo({{'Search: ' .. query, 'Normal'}}, false, {})

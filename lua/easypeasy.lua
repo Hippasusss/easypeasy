@@ -18,7 +18,6 @@ function M.searchSingleCharacter()
     highlight.toggle_grey_text()
 end
 
---FIXME: fix backspaceing to no characters leaves one highlighted
 --FIXME: fix pcall retrning ok even when esape is hit
 --FIXME: fix enter without match needs another enter press
 --FIXME: fix very occasionally there is an out of range for the line number and col number for the replacement Chars
