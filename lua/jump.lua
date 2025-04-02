@@ -29,7 +29,7 @@ function M.jumpToKey(jumpLocationInfo)
         vim.api.nvim_win_set_cursor(0, {filteredLocations[1].lineNum, filteredLocations[1].colNum - 1})
     elseif #filteredLocations > 0 then
         highlight.clearHighlights()
-        highlight.highlightLocations(jumpLocationInfo)
+        highlight.highlightJumpLocations(jumpLocationInfo)
         M.jumpToKey(jumpLocationInfo)
         return
     end

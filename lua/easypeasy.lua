@@ -7,14 +7,14 @@ local helper = require("helper")
 
 local M = {}
 
---FIXME: fix jump.lua 27 attempt to cal field highlightLocatoins (nil) for two key replacement
 function M.searchSingleCharacter()
     local key = input.askForKey("Search For Key: ")
     highlight.toggle_grey_text()
     highlight.clearHighlights()
-    local locations = select.findKeyLocationsInViewPort(key)
-    if #locations > 0 then
-        jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters()))
+    local jumpLocationInfo= select.findKeyLocationsInViewPort(key)
+    if #jumpLocationInfo.locations > 0 then
+        jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters(jumpLocationInfo)))
+    else
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
