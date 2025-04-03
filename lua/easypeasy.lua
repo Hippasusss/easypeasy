@@ -23,16 +23,12 @@ end
 
 --FIXME: fix error on esacpe
 --FIXME: fix enter without match needs another enter press
---TODO: Tab to next page of searches
---TODO: Automatically page down/up if no matches on current page
 function M.searchMultipleCharacters()
     highlight.toggle_grey_text()
     highlight.clearHighlights()
     local replacementLocations = highlight.InteractiveSearch()
     local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
     local relativeJumplocations = select.makeAbsoluteLocationsRelative(bufferJumplocations)
-    print("================================")
-    print(vim.inspect(relativeJumplocations))
     local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(relativeJumplocations)
     if replacementLocationsWithCharacters then
         jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))

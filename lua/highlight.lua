@@ -38,9 +38,6 @@ function M.highlightJumpLocations(jumpLocationInfo)
         local replacementString = location.replacementString
         local firstChar = replacementString:sub(1, 1)
         local restChars = replacementString:sub(2)
-	    -- print("highlight.highlightJumpLocations():")
-	    -- print(vim.inspect(location))
-	    -- print(" ")
 
         vim.api.nvim_buf_set_extmark(
             buf,
@@ -119,6 +116,25 @@ function M.InteractiveSearch()
     vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
     vim.api.nvim_echo({{'Enter search pattern: ', 'Question'}}, true, {})
 
+    local function jump_if_no_visible_matches()
+        if #matches == 0 then return end
+
+        local first_visible = vim.fn.line('w0')
+        local last_visible = vim.fn.line('w$')
+        local has_visible = false
+
+        for _, match in ipairs(matches) do
+            if match[1] >= first_visible and match[1] <= last_visible then
+                has_visible = true
+                break
+            end
+        end
+
+        if not has_visible then
+            vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2][1] - 1})
+        end
+    end
+
     while true do
         vim.cmd('redraw')
 
@@ -136,7 +152,26 @@ function M.InteractiveSearch()
             vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
             return nil
 
-        elseif normalized == '<Tab>'then
+        elseif normalized == '<Tab>' then
+            if #matches > 0 then
+                local last_visible_line = vim.fn.line('w$')
+                local last_file_line = vim.api.nvim_buf_line_count(0)
+                local next_match = nil
+
+                if last_visible_line >= last_file_line then
+                    next_match = matches[1]  -- Wrap to first match
+                else
+                    for _, match in ipairs(matches) do
+                        if match[1] > last_visible_line then
+                            next_match = match
+                            break
+                        end
+                    end
+                end
+                if next_match then
+                    vim.api.nvim_win_set_cursor(0, {next_match[1], next_match[2][1] - 1})
+                end
+            end
         elseif normalized == '<BS>' then
             query = query:sub(1, -2)
         else
@@ -177,6 +212,7 @@ function M.InteractiveSearch()
                         if start_idx >= #line then break end
                     end
                 end
+                jump_if_no_visible_matches()
             end
         else
             vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
