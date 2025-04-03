@@ -47,13 +47,5 @@ end
 function M.searchTreesitter()
 end
 
-
--- vim.keymap.set('n', '<leader>0', function() vim.cmd("luafile " .. vim.fn.expand("%:p")) end)
-vim.keymap.set('n', 's', M.searchSingleCharacter)
-vim.keymap.set('n', '<space>', M.searchMultipleCharacters)
-vim.keymap.set('n', '<leader>2', highlight.clearHighlights)
-print("loaded easy peasy")
--- holymoly
-
 return M
 
