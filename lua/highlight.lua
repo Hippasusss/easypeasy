@@ -183,7 +183,12 @@ function M.InteractiveSearch()
             vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
             matches = {}
 
-            local ok2, regex = pcall(vim.regex, query)
+            local regex_query = query
+            if query:lower() == query then
+                regex_query = '\\c' .. query
+            end
+
+            local ok2, regex = pcall(vim.regex, regex_query)
             if ok2 and regex then
                 local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
                 for lnum, line in ipairs(lines) do
