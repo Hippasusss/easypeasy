@@ -138,6 +138,7 @@ function M.InteractiveSearch()
     while true do
         vim.cmd('redraw')
 
+        vim.api.nvim_echo({{'Search: ' .. query, 'Normal'}}, false, {})
         local ok, char = pcall(vim.fn.getchar)
         if not ok then break end
 
@@ -218,7 +219,6 @@ function M.InteractiveSearch()
             vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
         end
 
-        vim.api.nvim_echo({{'Search: ' .. query, 'Normal'}}, false, {})
     end
 
     vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
