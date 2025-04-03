@@ -21,17 +21,21 @@ function M.searchSingleCharacter()
     highlight.toggle_grey_text()
 end
 
---FIXME: fix error on esacpe
 --FIXME: fix enter without match needs another enter press
 function M.searchMultipleCharacters()
     highlight.toggle_grey_text()
     highlight.clearHighlights()
     local replacementLocations = highlight.InteractiveSearch()
-    local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
-    local relativeJumplocations = select.makeAbsoluteLocationsRelative(bufferJumplocations)
-    local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(relativeJumplocations)
-    if replacementLocationsWithCharacters then
-        jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
+    if replacementLocations then
+        local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
+        local relativeJumplocations = select.makeAbsoluteLocationsRelative(bufferJumplocations)
+        local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(relativeJumplocations)
+        if replacementLocationsWithCharacters then
+            jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
+        end
+    else
+	    vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
+        highlight.toggle_grey_text() -- not sure why this needs called twice
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
