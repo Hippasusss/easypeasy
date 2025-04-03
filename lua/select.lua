@@ -26,6 +26,28 @@ function M.makeAbsoluteLocationsRelative(jumpLocationInfo)
     return jumpLocationInfo
 end
 
+function M.findAllVisibleLineStarts()
+    local windowInfo = M.getWindowInfo()
+    local jumpLocationInfo = {
+        locations = {},
+        windowInfo = windowInfo,
+        numMatches = windowInfo.last_line - windowInfo.first_line + 1
+    }
+    local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
+    local matches = {}
+    for linenumber, line in ipairs(lines) do
+        if line:match("^%s*$") == nil then
+            table.insert(matches, {
+                linenumber ,
+                { 1 }
+            })
+        end
+    end
+    jumpLocationInfo.locations = matches
+    jumpLocationInfo.numMatches = #matches
+    return jumpLocationInfo
+end
+
 function M.findKeyLocationsInViewPort(key)
     local windowInfo = M.getWindowInfo()
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)

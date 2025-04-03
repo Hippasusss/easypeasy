@@ -46,7 +46,7 @@ function M.highlightJumpLocations(jumpLocationInfo)
             charNumber - 1,
             {
                 hl_group = 'EasyPeasyMain',
-                end_col = charNumber,
+                end_col = charNumber-1,
                 virt_text = {{firstChar, 'EasyPeasyMain'}},
                 virt_text_pos = 'overlay',
                 priority = 1000,

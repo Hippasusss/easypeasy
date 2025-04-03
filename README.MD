@@ -6,7 +6,7 @@ A Lua rewrite of vim-easymotion that avoids buffer swapping to maintain better L
 
 - Single character search: ✅ Working
 - String search: ✅ Working
-- Line search: ⏳ Not yet 
+- Line search: ✅ Working
 - Treesitter node motions: ⏳ Not yet 
 
 ## Installation (Lazy.nvim)
@@ -15,9 +15,9 @@ A Lua rewrite of vim-easymotion that avoids buffer swapping to maintain better L
     {
         "Hippasusss/easypeasy",
             keys = {
-                {"s", function() require("easypeasy").searchSingleCharacter() end},
+                { "s", function() require("easypeasy").searchSingleCharacter() end},
                 { "/", function() require("easypeasy").searchMultipleCharacters() end}
-
+                { "<leader>l", function() require("easypeasy").searchLines() end}
             },
     },
 ```
@@ -29,14 +29,3 @@ There are millions of buffer navigation searchy plugins. But I like easy motion.
 - Avoid buffer swapping (which makes your LSP have a panic attack)
 - Provide a pure Lua implementation
 
-## Key Mappings
-
-The default mapping is:
-- `s` - Search for single character
-- `\/` - Search for single character
-
-## Roadmap
-
-Planned features in order of implementation:
-1. Line search
-2. Treesitter node motions (something like flash.nvim)
