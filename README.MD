@@ -38,5 +38,5 @@ The default mapping is:
 ## Roadmap
 
 Planned features in order of implementation:
-2. Line search
-3. Treesitter node motions (something like flash.nvim)
+1. Line search
+2. Treesitter node motions (something like flash.nvim)
