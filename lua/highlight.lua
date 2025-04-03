@@ -113,32 +113,90 @@ function M.InteractiveSearch()
     local query = ''
     local matches = {}
 
-    vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-    vim.api.nvim_echo({{'Enter search pattern: ', 'Question'}}, true, {})
+    local function clear_highlights()
+        vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+    end
+
+    local function update_matches()
+        clear_highlights()
+        matches = {}
+
+        if #query == 0 then return end
+
+        local regex_query = query:lower() == query and '\\c' .. query or query
+        local ok, regex = pcall(vim.regex, regex_query)
+        if not ok or not regex then return end
+
+        local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+        for lnum, line in ipairs(lines) do
+            local start_idx = 0
+            while true do
+                local substr = line:sub(start_idx + 1)
+                local s, e = regex:match_str(substr)
+                if not s then break end
+
+                s = s + start_idx
+                e = e + start_idx
+
+                vim.api.nvim_buf_add_highlight(
+                    buf, ns, 'EasyPeasySearch',
+                    lnum - 1,
+                    s,
+                    e
+                )
+
+                table.insert(matches, {lnum, {s + 1}})
+                start_idx = e
+                if start_idx >= #line then break end
+            end
+        end
+    end
 
     local function jump_if_no_visible_matches()
         if #matches == 0 then return end
 
         local first_visible = vim.fn.line('w0')
         local last_visible = vim.fn.line('w$')
-        local has_visible = false
 
         for _, match in ipairs(matches) do
             if match[1] >= first_visible and match[1] <= last_visible then
-                has_visible = true
-                break
+                return
             end
         end
 
-        if not has_visible then
-            vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2][1] - 1})
+        vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2][1] - 1})
+    end
+
+    local function handle_tab()
+        if #matches == 0 then return end
+
+        local last_visible_line = vim.fn.line('w$')
+        local last_file_line = vim.api.nvim_buf_line_count(0)
+        local next_match = nil
+
+        if last_visible_line >= last_file_line then
+            next_match = matches[1]
+        else
+            for _, match in ipairs(matches) do
+                if match[1] > last_visible_line then
+                    next_match = match
+                    break
+                end
+            end
+        end
+
+        if next_match then
+            vim.api.nvim_win_set_cursor(0, {next_match[1], next_match[2][1] - 1})
         end
     end
 
+    clear_highlights()
+    vim.api.nvim_echo({{'Enter search pattern: ', 'Question'}}, true, {})
+
     while true do
         vim.cmd('redraw')
-
         vim.api.nvim_echo({{'Search: ' .. query, 'Normal'}}, false, {})
+
         local ok, char = pcall(vim.fn.getchar)
         if not ok then break end
 
@@ -147,86 +205,24 @@ function M.InteractiveSearch()
 
         if normalized == '<CR>' then
             break
-        elseif normalized == '<Esc>'then
+        elseif normalized == '<Esc>' then
             vim.api.nvim_echo({{'Search cancelled', 'WarningMsg'}}, true, {})
-            M.toggle_grey_text()
-            vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+            clear_highlights()
             return nil
-
         elseif normalized == '<Tab>' then
-            if #matches > 0 then
-                local last_visible_line = vim.fn.line('w$')
-                local last_file_line = vim.api.nvim_buf_line_count(0)
-                local next_match = nil
-
-                if last_visible_line >= last_file_line then
-                    next_match = matches[1]  -- Wrap to first match
-                else
-                    for _, match in ipairs(matches) do
-                        if match[1] > last_visible_line then
-                            next_match = match
-                            break
-                        end
-                    end
-                end
-                if next_match then
-                    vim.api.nvim_win_set_cursor(0, {next_match[1], next_match[2][1] - 1})
-                end
-            end
+            handle_tab()
         elseif normalized == '<BS>' then
             query = query:sub(1, -2)
+            update_matches()
+            jump_if_no_visible_matches()
         else
             query = query .. vim.fn.nr2char(char)
+            update_matches()
+            jump_if_no_visible_matches()
         end
-
-        if #query > 0 then
-            vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-            matches = {}
-
-            local regex_query = query
-            if query:lower() == query then
-                regex_query = '\\c' .. query
-            end
-
-            local ok2, regex = pcall(vim.regex, regex_query)
-            if ok2 and regex then
-                local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-                for lnum, line in ipairs(lines) do
-                    local start_idx = 0
-                    while true do
-                        local substr = line:sub(start_idx + 1)
-                        local s, e = regex:match_str(substr)
-                        if not s then break end
-
-                        -- absolute
-                        s = s + start_idx
-                        e = e + start_idx
-
-                        vim.api.nvim_buf_add_highlight(
-                            buf, ns, 'EasyPeasySearch',
-                            lnum - 1,
-                            s,
-                            e
-                        )
-
-                        table.insert(matches, {
-                            lnum,
-                            {s + 1},
-                        })
-
-                        start_idx = e
-                        if start_idx >= #line then break end
-                    end
-                end
-                jump_if_no_visible_matches()
-            end
-        else
-            vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-        end
-
     end
 
-    vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+    clear_highlights()
     return matches
 end
 

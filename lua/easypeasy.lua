@@ -35,7 +35,6 @@ function M.searchMultipleCharacters()
         end
     else
         vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
-        highlight.toggle_grey_text() -- not sure why this needs called twice
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
