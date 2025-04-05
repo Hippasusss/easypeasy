@@ -4,6 +4,7 @@ local replace = require("replace")
 local jump = require("jump")
 local input = require("input")
 local helper = require("helper")
+local tresitterSearch = require("treesitterSearch")
 
 local M = {}
 
@@ -51,18 +52,9 @@ function M.searchLines()
         end
     else
         vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
-        highlight.toggle_grey_text() -- not sure why this needs called twice
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
-end
-
-function M.searchTreesitter()
-    local parser = vim.treesitter.get_parser()
-    if parser then
-        local tree = parser:parse()[1]
-        local root = tree:root()
-    end
 end
 
 return M
