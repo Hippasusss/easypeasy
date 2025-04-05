@@ -58,8 +58,5 @@ function M.searchLines()
     highlight.toggle_grey_text()
 end
 
-function M.searchTreesitter()
-end
-
 return M
 
