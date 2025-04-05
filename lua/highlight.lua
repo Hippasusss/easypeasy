@@ -19,7 +19,7 @@ vim.api.nvim_set_hl(0, 'EasyPeasySearch', {
     bold = true,
 })
 
-local original_hl = {}
+local originalHL = {}
 
 local EXCLUDE_GROUPS = {
     ['EasyPeasyMain'] = true,
@@ -27,7 +27,7 @@ local EXCLUDE_GROUPS = {
     ['EasyPeasySearch'] = true
 }
 
-local ns = vim.api.nvim_create_namespace('easypeasy')
+local colorNameSpace = vim.api.nvim_create_namespace('easypeasy')
 
 function M.highlightJumpLocations(jumpLocationInfo)
     local buf = jumpLocationInfo.buffer or 0
@@ -41,7 +41,7 @@ function M.highlightJumpLocations(jumpLocationInfo)
 
         vim.api.nvim_buf_set_extmark(
             buf,
-            ns,
+            colorNameSpace,
             absLinenum - 1,
             charNumber - 1,
             {
@@ -56,7 +56,7 @@ function M.highlightJumpLocations(jumpLocationInfo)
         if #restChars > 0 then
             vim.api.nvim_buf_set_extmark(
                 buf,
-                ns,
+                colorNameSpace,
                 absLinenum - 1,
                 charNumber,
                 {
@@ -75,12 +75,12 @@ end
 
 
 function M.toggle_grey_text()
-    if next(original_hl) == nil then
+    if next(originalHL) == nil then
         for _, name in ipairs(vim.fn.getcompletion('', 'highlight')) do
             if not EXCLUDE_GROUPS[name] then
                 local hl = vim.api.nvim_get_hl(0, { name = name })
                 if hl and not hl.link then
-                    original_hl[name] = vim.deepcopy(hl)
+                    originalHL[name] = vim.deepcopy(hl)
                     vim.api.nvim_set_hl(0, name, {
                         fg = M.fadedKeyColor,
                         bg = hl.bg,
@@ -89,10 +89,10 @@ function M.toggle_grey_text()
             end
         end
     else
-        for name, attrs in pairs(original_hl) do
+        for name, attrs in pairs(originalHL) do
             vim.api.nvim_set_hl(0, name, attrs)
         end
-        original_hl = {}
+        originalHL = {}
     end
     M.forceDraw()
 end
@@ -106,7 +106,7 @@ end
 
 function M.clearHighlights(buf)
     buf = buf or 0
-    vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+    vim.api.nvim_buf_clear_namespace(buf, colorNameSpace, 0, -1)
 end
 
 function M.InteractiveSearch()
@@ -125,26 +125,26 @@ function M.InteractiveSearch()
         if not ok or not regex then return end
 
         local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-        for lnum, line in ipairs(lines) do
-            local start_idx = 0
+        for lineNum, line in ipairs(lines) do
+            local startIdx = 0
             while true do
-                local substr = line:sub(start_idx + 1)
-                local s, e = regex:match_str(substr)
-                if not s then break end
+                local substr = line:sub(startIdx + 1)
+                local matchStartCol, matchEndCol = regex:match_str(substr)
+                if not matchStartCol then break end
 
-                s = s + start_idx
-                e = e + start_idx
+                matchStartCol = matchStartCol + startIdx
+                matchEndCol = matchEndCol + startIdx
 
                 vim.api.nvim_buf_add_highlight(
-                    buf, ns, 'EasyPeasySearch',
-                    lnum - 1,
-                    s,
-                    e
+                    buf, colorNameSpace, 'EasyPeasySearch',
+                    lineNum - 1,
+                    matchStartCol,
+                    matchEndCol
                 )
 
-                table.insert(matches, {lnum, {s + 1}})
-                start_idx = e
-                if start_idx >= #line then break end
+                table.insert(matches, {lineNum, {matchStartCol + 1}})
+                startIdx = matchEndCol
+                if startIdx >= #line then break end
             end
         end
     end
@@ -152,11 +152,11 @@ function M.InteractiveSearch()
     local function jump_if_no_visible_matches()
         if #matches == 0 then return end
 
-        local first_visible = vim.fn.line('w0')
-        local last_visible = vim.fn.line('w$')
+        local firstVisible = vim.fn.line('w0')
+        local lastVisible = vim.fn.line('w$')
 
         for _, match in ipairs(matches) do
-            if match[1] >= first_visible and match[1] <= last_visible then
+            if match[1] >= firstVisible and match[1] <= lastVisible then
                 return
             end
         end
@@ -167,23 +167,23 @@ function M.InteractiveSearch()
     local function handle_tab()
         if #matches == 0 then return end
 
-        local last_visible_line = vim.fn.line('w$')
-        local last_file_line = vim.api.nvim_buf_line_count(0)
-        local next_match = nil
+        local lastVisibleLine = vim.fn.line('w$')
+        local lastFileLine = vim.api.nvim_buf_line_count(0)
+        local nextMatch = nil
 
-        if last_visible_line >= last_file_line then
-            next_match = matches[1]
+        if lastVisibleLine >= lastFileLine then
+            nextMatch = matches[1]
         else
             for _, match in ipairs(matches) do
-                if match[1] > last_visible_line then
-                    next_match = match
+                if match[1] > lastVisibleLine then
+                    nextMatch = match
                     break
                 end
             end
         end
 
-        if next_match then
-            vim.api.nvim_win_set_cursor(0, {next_match[1], next_match[2][1] - 1})
+        if nextMatch then
+            vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2][1] - 1})
         end
     end
 
@@ -197,8 +197,8 @@ function M.InteractiveSearch()
         local ok, char = pcall(vim.fn.getchar)
         if not ok then break end
 
-        local char_str = type(char) == 'number' and vim.fn.nr2char(char) or char
-        local normalized = vim.fn.keytrans(tostring(char_str))
+        local charStr = type(char) == 'number' and vim.fn.nr2char(char) or char
+        local normalized = vim.fn.keytrans(tostring(charStr))
 
         if normalized == '<CR>' then
             break
