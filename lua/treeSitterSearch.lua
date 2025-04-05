@@ -15,4 +15,13 @@ function M.searchTreeSitter()
     return matches
 end
 
+function M.visualSelectNodeAtStartLocation(lineNum, colNum)
+end
+
+function M.yankNodeAtStartLocation(lineNum, colNum)
+end
+
+function M.deleteNodeAtStartLocation(lineNum, colNum)
+end
+
 return M
