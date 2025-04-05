@@ -131,7 +131,7 @@ function M.InteractiveSearch()
     local query = ''
     local matches = {}
 
-    local function update_matches()
+    local function updateMatches()
         M.clearHighlights(buf)
         matches = {}
 
@@ -166,7 +166,7 @@ function M.InteractiveSearch()
         end
     end
 
-    local function jump_if_no_visible_matches()
+    local function jumpIfNoMatchesInWindow()
         if #matches == 0 then return end
 
         local firstVisible = vim.fn.line('w0')
@@ -233,12 +233,12 @@ function M.InteractiveSearch()
             handleTab(false)
         elseif normalized == '<BS>' then
             query = query:sub(1, -2)
-            update_matches()
-            jump_if_no_visible_matches()
+            updateMatches()
+            jumpIfNoMatchesInWindow()
         else
             query = query .. vim.fn.nr2char(char)
-            update_matches()
-            jump_if_no_visible_matches()
+            updateMatches()
+            jumpIfNoMatchesInWindow()
         end
     end
 
