@@ -58,6 +58,8 @@ function M.searchLines()
 end
 
 function M.searchTreeSitter()
+    highlight.toggle_grey_text()
+    highlight.clearHighlights()
     local replacementLocations = treeSitterSearch.searchTreeSitter()
     if replacementLocations then
         local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
