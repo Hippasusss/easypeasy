@@ -15,7 +15,7 @@ function M.searchSingleCharacter()
     if #jumpLocationInfo.locations > 0 then
         jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters(jumpLocationInfo)))
     else
-    vim.api.nvim_echo({{'No Matches!', 'WarningMsg'}}, true, {})
+        vim.api.nvim_echo({{'No Matches!', 'WarningMsg'}}, true, {})
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
@@ -61,6 +61,7 @@ function M.searchTreesitter()
     local parser = vim.treesitter.get_parser()
     if parser then
         local tree = parser:parse()[1]
+        local root = tree:root()
     end
 end
 
