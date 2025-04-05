@@ -114,11 +114,13 @@ function M.toggle_grey_text()
     M.forceDraw()
 end
 
-function M.forceDraw()
-    vim.schedule(function()
-        vim.cmd("mode")
-        vim.cmd("redraw!")
-    end)
+function M.forceDraw(immediate)
+    immediate = immediate or 0
+    if immediate then
+        vim.cmd("redraw")
+    else
+        vim.schedule(vim.cmd.redraw)
+    end
 end
 
 function M.clearHighlights(buf)
@@ -209,11 +211,14 @@ function M.InteractiveSearch()
 
 
     M.clearHighlights(buf)
-    vim.api.nvim_echo({{'Enter search pattern: ', 'Question'}}, true, {})
+
+    local function redrawPrompt()
+        vim.api.nvim_echo({{'Search: '..query, 'EasyPeasySearch'}}, true, {})
+        M.forceDraw(true)
+    end
 
     while true do
-        vim.api.nvim_echo({{'Search: ' .. query, 'Normal'}}, false, {})
-        vim.cmd('redraw')
+        redrawPrompt()
 
         local ok, char = pcall(vim.fn.getchar)
         if not ok then break end
