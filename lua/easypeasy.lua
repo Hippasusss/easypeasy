@@ -15,7 +15,7 @@ function M.searchSingleCharacter()
     if #jumpLocationInfo.locations > 0 then
         jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters(jumpLocationInfo)))
     else
-    vim.api.nvim_echo({{'No Matches!', 'WarningMsg'}}, true, {})
+        vim.api.nvim_echo({{'No Matches!', 'WarningMsg'}}, true, {})
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
@@ -35,7 +35,6 @@ function M.searchMultipleCharacters()
         end
     else
         vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
-        highlight.toggle_grey_text() -- not sure why this needs called twice
     end
     highlight.clearHighlights()
     highlight.toggle_grey_text()
