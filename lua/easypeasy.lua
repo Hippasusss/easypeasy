@@ -58,6 +58,10 @@ function M.searchLines()
 end
 
 function M.searchTreesitter()
+    local parser = vim.treesitter.get_parser()
+    if parser then
+        local tree = parser:parse()[1]
+    end
 end
 
 return M

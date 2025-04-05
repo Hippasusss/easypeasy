@@ -104,8 +104,9 @@ function M.forceDraw()
     end)
 end
 
-function M.clearHighlights()
-    vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
+function M.clearHighlights(buf)
+    buf = buf or 0
+    vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
 end
 
 function M.InteractiveSearch()
@@ -113,12 +114,8 @@ function M.InteractiveSearch()
     local query = ''
     local matches = {}
 
-    local function clear_highlights()
-        vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-    end
-
     local function update_matches()
-        clear_highlights()
+        M.clearHighlights(buf)
         matches = {}
 
         if #query == 0 then return end
@@ -190,12 +187,12 @@ function M.InteractiveSearch()
         end
     end
 
-    clear_highlights()
+    M.clearHighlights(buf)
     vim.api.nvim_echo({{'Enter search pattern: ', 'Question'}}, true, {})
 
     while true do
-        vim.cmd('redraw')
         vim.api.nvim_echo({{'Search: ' .. query, 'Normal'}}, false, {})
+        vim.cmd('redraw')
 
         local ok, char = pcall(vim.fn.getchar)
         if not ok then break end
@@ -207,7 +204,7 @@ function M.InteractiveSearch()
             break
         elseif normalized == '<Esc>' then
             vim.api.nvim_echo({{'Search cancelled', 'WarningMsg'}}, true, {})
-            clear_highlights()
+            M.clearHighlights(buf)
             return nil
         elseif normalized == '<Tab>' then
             handle_tab()
@@ -222,7 +219,7 @@ function M.InteractiveSearch()
         end
     end
 
-    clear_highlights()
+    M.clearHighlights(buf)
     return matches
 end
 
