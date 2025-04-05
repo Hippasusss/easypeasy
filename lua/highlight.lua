@@ -8,14 +8,20 @@ M.searchMatchColor = '#99F78B'
 
 vim.api.nvim_set_hl(0, 'EasyPeasyMain', {
     fg = M.primarySelectorKeyColor,
+    special = M.primarySelectorKeyColor,
+    default = false,
     bold = true,
 })
 vim.api.nvim_set_hl(0, 'EasyPeasySecondary', {
     fg = M.secondarySelectorKeyColor,
+    special = M.secondarySelectorKeyColor,
+    default = false,
     bold = true,
 })
 vim.api.nvim_set_hl(0, 'EasyPeasySearch', {
     fg = M.searchMatchColor,
+    special = M.searchMatchColor,
+    default = false,
     bold = true,
 })
 
@@ -85,9 +91,20 @@ function M.toggle_grey_text()
                         fg = M.fadedKeyColor,
                         bg = hl.bg,
                     })
+
                 end
             end
         end
+        vim.api.nvim_set_hl(0, 'Cursor', {
+            fg = 'NONE',
+            bg = 'NONE',
+            blend = 100
+        })
+        vim.api.nvim_set_hl(0, 'CursorLine', {
+            fg = 'NONE',
+            bg = 'NONE',
+            blend = 100
+        })
     else
         for name, attrs in pairs(originalHL) do
             vim.api.nvim_set_hl(0, name, attrs)
