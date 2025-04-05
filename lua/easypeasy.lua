@@ -4,6 +4,7 @@ local replace = require("replace")
 local jump = require("jump")
 local input = require("input")
 local helper = require("helper")
+local treeSitterSearch = require("treeSitterSearch")
 
 local M = {}
 
@@ -57,13 +58,23 @@ function M.searchLines()
     highlight.toggle_grey_text()
 end
 
-function M.searchTreesitter()
-    local parser = vim.treesitter.get_parser()
-    if parser then
-        local tree = parser:parse()[1]
-        local root = tree:root()
+function M.searchTreeSitter()
+    local replacementLocations = treeSitterSearch.searchTreeSitter()
+    if replacementLocations then
+        local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
+        local relativeJumplocations = select.makeAbsoluteLocationsRelative(bufferJumplocations)
+        local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(relativeJumplocations)
+        if replacementLocationsWithCharacters then
+            jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
+        end
+    else
+        vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
     end
+    highlight.clearHighlights()
+    highlight.toggle_grey_text()
 end
+
+vim.keymap.set("n", "<leader>t", function() require("easypeasy").searchTreeSitter() end)
 
 return M
 
