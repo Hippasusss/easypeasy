@@ -181,28 +181,32 @@ function M.InteractiveSearch()
         vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2][1] - 1})
     end
 
-    local function handle_tab()
+    local function handleTab(down)
         if #matches == 0 then return end
 
-        local lastVisibleLine = vim.fn.line('w$')
-        local lastFileLine = vim.api.nvim_buf_line_count(0)
+        local edgeVisibleLine = down and vim.fn.line('w$') or vim.fn.line('w0')
+        local compare = down and function(a,b) return a>b end or function(a,b) return a<b end
         local nextMatch = nil
 
-        if lastVisibleLine >= lastFileLine then
-            nextMatch = matches[1]
-        else
-            for _, match in ipairs(matches) do
-                if match[1] > lastVisibleLine then
-                    nextMatch = match
-                    break
-                end
+        for i = down and 1 or #matches, down and #matches or 1, down and 1 or -1 do
+            if compare(matches[i][1], edgeVisibleLine) then
+                nextMatch = matches[i];
+                print (vim.inspect(nextMatch[1]))
+                break
             end
+        end
+        print("edgeVisibel: " ..  edgeVisibleLine)
+        print("nextMatch: " .. vim.inspect(nextMatch))
+
+        if not nextMatch or nextMatch[1] == vim.fn.line('.') then
+            nextMatch = down and matches[1] or matches[#matches]
         end
 
         if nextMatch then
             vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2][1] - 1})
         end
     end
+
 
     M.clearHighlights(buf)
     vim.api.nvim_echo({{'Enter search pattern: ', 'Question'}}, true, {})
@@ -224,7 +228,9 @@ function M.InteractiveSearch()
             M.clearHighlights(buf)
             return nil
         elseif normalized == '<Tab>' then
-            handle_tab()
+            handleTab(true)
+        elseif normalized == '<S-Tab>' then
+            handleTab(false)
         elseif normalized == '<BS>' then
             query = query:sub(1, -2)
             update_matches()
