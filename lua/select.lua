@@ -57,19 +57,13 @@ function M.findKeyLocationsInViewPort(key)
     }
 
     for linenumber, line in ipairs(lines) do
-        local charColNums = {}
         for charColNum = 1, #line do
             local lineKey = line:sub(charColNum,charColNum)
             if lineKey == key then
-                table.insert(charColNums, charColNum)
-            end
-        end
-        if #charColNums > 0 then
-            for i, colNum in ipairs(charColNums) do
                 table.insert(jumpLocationInfo.locations,
                     {
                         linenumber,
-                        colNum
+                        charColNum
                     })
             end
         end
