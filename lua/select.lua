@@ -16,11 +16,14 @@ function M.createJumpLocations(locations, numMatches)
     return {
         locations = locations,
         windowInfo = M.getWindowInfo(),
-        numMatches = numMatches}
+    }
 end
 
 function M.makeAbsoluteLocationsRelative(jumpLocationInfo)
-    for _, location in pairs(jumpLocationInfo.locations) do
+    for i, location in pairs(jumpLocationInfo.locations) do
+        if location[1] < jumpLocationInfo.windowInfo.first_line or location[1] > jumpLocationInfo.windowInfo.last_line then
+            table.remove(jumpLocationInfo.locations, i)
+        end
         location[1] = location[1] - jumpLocationInfo.windowInfo.first_line + 1
     end
     return jumpLocationInfo
@@ -31,7 +34,6 @@ function M.findAllVisibleLineStarts()
     local jumpLocationInfo = {
         locations = {},
         windowInfo = windowInfo,
-        numMatches = windowInfo.last_line - windowInfo.first_line + 1
     }
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local matches = {}
