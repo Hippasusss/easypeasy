@@ -15,88 +15,61 @@ local searchFor = {
     "while_loop",
     "if_expression",
 
-    "block_comment",
-    "comment_block",
-    "multiline_comment",
-    "line_comment",
-    "doc_comment",
     -- Functions/methods
     -- "function_definition",
     -- "method_definition",
-    -- "function_declaration",
+    "function_declaration",
     "arrow_function",
-    "function",
+    -- "function",
     "method",
     "lambda",
     "anonymous_function"
 }
 
+local function executeSearch(getLocationsFn, postProcessFn)
+    highlight.toggle_grey_text()
+    local success, replacementLocations = pcall(getLocationsFn)
+    local ok, err = pcall(function()
+        if success and replacementLocations then
+            local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
+            bufferJumplocations = select.trimLocationsToWindow(bufferJumplocations)
+            local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(bufferJumplocations)
+
+            if replacementLocationsWithCharacters then
+                local location = jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
+                if postProcessFn then
+                    postProcessFn(location)
+                end
+            end
+        else
+            vim.api.nvim_echo({{success and 'Exited' or 'Error: '..tostring(replacementLocations), 'WarningMsg'}}, true, {})
+        end
+    end)
+    highlight.toggle_grey_text()
+end
+
 function M.searchSingleCharacter()
-    highlight.toggle_grey_text()
-
-    local key = input.askForKey("Search For Key: ")
-    local jumpLocationInfo = select.findKeyLocationsInViewPort(key)
-
-    if #jumpLocationInfo.locations > 0 then
-        jump.jumpToKey(highlight.highlightJumpLocations(replace.calculateReplacementCharacters(jumpLocationInfo)))
-    else
-        vim.api.nvim_echo({{'No Matches!', 'WarningMsg'}}, true, {})
-    end
-    highlight.toggle_grey_text()
+    executeSearch(function()
+        local key = input.askForKey("Search For Key: ")
+        return select.findKeyLocationsInViewPort(key)
+    end)
 end
 
 function M.searchMultipleCharacters()
-    highlight.toggle_grey_text()
-
-    local replacementLocations = highlight.InteractiveSearch()
-
-    if replacementLocations then
-        local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
-        bufferJumplocations = select.trimLocationsToWindow(bufferJumplocations)
-        local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(bufferJumplocations)
-        if replacementLocationsWithCharacters then
-            jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
-        end
-    else
-        vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
-    end
-    highlight.toggle_grey_text()
+    executeSearch(highlight.InteractiveSearch)
 end
 
 function M.searchLines()
-    highlight.toggle_grey_text()
-
-    local replacementLocations = select.findAllVisibleLineStarts()
-
-    if replacementLocations then
-        local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(replacementLocations)
-        if replacementLocationsWithCharacters then
-            jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
-        end
-    else
-        vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
-    end
-    highlight.toggle_grey_text()
+    executeSearch(select.findAllVisibleLineStarts)
 end
 
 function M.selectTreeSitter()
-    highlight.toggle_grey_text()
-
-    local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(searchFor)
-    local replacementLocations = treeSitterSearch.getNodeLocations(replacementNodes)
-
-    if replacementLocations then
-        local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
-        bufferJumplocations = select.trimLocationsToWindow(bufferJumplocations)
-        local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(bufferJumplocations)
-        if replacementLocationsWithCharacters then
-            local location = jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
+    executeSearch(function()
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(searchFor)
+        return treeSitterSearch.getNodeLocations(replacementNodes)
+    end, function(location)
             treeSitterSearch.visuallySelectNodeAtLocaiton({location.lineNum, location.colNum})
-        end
-    else
-        vim.api.nvim_echo({{'Exited', 'WarningMsg'}}, true, {})
-    end
-    highlight.toggle_grey_text()
+        end)
 end
 
 vim.keymap.set("n", "<leader>t", function() require("easypeasy").selectTreeSitter() end)
