@@ -20,54 +20,43 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
         return distA < distB
     end)
 
-    local counter = 0
+    local replacementString = M.generate_replacement_strings(#jumpLocationInfo.locations)
     for i, location in ipairs(jumpLocationInfo.locations) do
         local relLineNum = location[1]
         local absLineNum = firstLine + relLineNum - 1
         local charColNum = location[2]
 
-        local replacementString = M.generate_replacement_string(counter, #jumpLocationInfo.locations)
         table.insert(replacementChars,
             {
                 lineNum = absLineNum,
                 colNum = charColNum,
-                replacementString = replacementString
+                replacementString = replacementString[i]
             })
-        counter = counter + 1
     end
     jumpLocationInfo.locations = replacementChars
     return jumpLocationInfo
 end
 
-function M.generate_replacement_string(counter, numMatches)
-    local chars = M.characterMap
-    local numChars = #chars
+function M.generate_replacement_strings(numMatches)
 
     -- Calculate character distribution
-    local numPrefixChars = math.min(math.floor(numMatches / numChars), numChars - 1)
-    local numRegularChars = numChars - numPrefixChars
+    local numDoubleChars = math.max(0, math.floor(( numMatches - #M.characterMap) / #M.characterMap))
+    local numRegularChars = #M.characterMap - numDoubleChars - 1
 
-    -- Build character tables
-    local prefixChars = {}
-    local regularChars = {}
-
-    for i = 1, numRegularChars do
-        regularChars[i] = chars[i]
+    local result = {}
+    for i = 1, numMatches-numDoubleChars do
+        result[i] = M.characterMap[i]
     end
 
-    for i = 1, numPrefixChars do
-        prefixChars[i] = chars[numRegularChars + i]
+    local doubleIndex = #M.characterMap
+    for i = 1, numMatches do
+        local prefixChar = M.characterMap[#M.characterMap - (math.floor(i / #M.characterMap))]
+        local secondChar = M.characterMap[i % #M.characterMap + 1]
+        print("prefixChar: " .. prefixChar)
+        print("secondChar: " .. secondChar)
+        result[numRegularChars + i] =  prefixChar .. secondChar
     end
 
-    -- Calculate positions
-    local iter = math.floor(counter / numRegularChars)
-    local char_idx = (counter % numRegularChars) + 1
-
-    -- Construct return string
-    local result = regularChars[char_idx]
-    if iter > 0 and iter <= #prefixChars then
-        result = prefixChars[iter] .. result
-    end
     return result
 end
 return M
