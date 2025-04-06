@@ -52,8 +52,6 @@ function M.generate_replacement_strings(numMatches)
     for i = 1, numMatches do
         local prefixChar = M.characterMap[#M.characterMap - (math.floor(i / #M.characterMap))]
         local secondChar = M.characterMap[i % #M.characterMap + 1]
-        print("prefixChar: " .. prefixChar)
-        print("secondChar: " .. secondChar)
         result[numRegularChars + i] =  prefixChar .. secondChar
     end
 

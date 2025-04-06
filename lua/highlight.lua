@@ -198,8 +198,6 @@ function M.InteractiveSearch()
                 break
             end
         end
-        print("edgeVisibel: " ..  edgeVisibleLine)
-        print("nextMatch: " .. vim.inspect(nextMatch))
 
         if not nextMatch or nextMatch[1] == vim.fn.line('.') then
             nextMatch = down and matches[1] or matches[#matches]
