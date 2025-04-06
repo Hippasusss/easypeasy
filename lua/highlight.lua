@@ -111,6 +111,7 @@ function M.toggle_grey_text()
         end
         originalHL = {}
     end
+    M.clearHighlights()
     M.forceDraw()
 end
 
