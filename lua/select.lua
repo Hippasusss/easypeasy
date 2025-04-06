@@ -16,12 +16,14 @@ function M.createJumpLocations(locations, numMatches)
     return {
         locations = locations,
         windowInfo = M.getWindowInfo(),
-        numMatches = numMatches}
+    }
 end
 
-function M.makeAbsoluteLocationsRelative(jumpLocationInfo)
-    for _, location in pairs(jumpLocationInfo.locations) do
-        location[1] = location[1] - jumpLocationInfo.windowInfo.first_line + 1
+function M.trimLocationsToWindow(jumpLocationInfo)
+    for i, location in ipairs(jumpLocationInfo.locations) do
+        if (location[1] < jumpLocationInfo.windowInfo.first_line) or (location[1] > jumpLocationInfo.windowInfo.last_line) then
+            table.remove(jumpLocationInfo.locations, i)
+        end
     end
     return jumpLocationInfo
 end
@@ -31,14 +33,13 @@ function M.findAllVisibleLineStarts()
     local jumpLocationInfo = {
         locations = {},
         windowInfo = windowInfo,
-        numMatches = windowInfo.last_line - windowInfo.first_line + 1
     }
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local matches = {}
     for linenumber, line in ipairs(lines) do
         if line:match("^%s*$") == nil then
             table.insert(matches, {
-                linenumber ,
+                linenumber + windowInfo.first_line - 1,
                 1
             })
         end
@@ -57,19 +58,13 @@ function M.findKeyLocationsInViewPort(key)
     }
 
     for linenumber, line in ipairs(lines) do
-        local charColNums = {}
         for charColNum = 1, #line do
             local lineKey = line:sub(charColNum,charColNum)
             if lineKey == key then
-                table.insert(charColNums, charColNum)
-            end
-        end
-        if #charColNums > 0 then
-            for i, colNum in ipairs(charColNums) do
                 table.insert(jumpLocationInfo.locations,
                     {
-                        linenumber,
-                        colNum
+                        linenumber + windowInfo.first_line - 1,
+                        charColNum
                     })
             end
         end
