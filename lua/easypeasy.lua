@@ -7,24 +7,6 @@ local helper = require("helper")
 local treeSitterSearch = require("treeSitterSearch")
 
 local M = {}
-local searchFor = {
-    "if_statement",
-    "for_statement",
-    "while_statement",
-    "for_loop",
-    "while_loop",
-    "if_expression",
-
-    -- Functions/methods
-    -- "function_definition",
-    -- "method_definition",
-    "function_declaration",
-    "arrow_function",
-    -- "function",
-    "method",
-    "lambda",
-    "anonymous_function"
-}
 
 local function executeSearch(getLocationsFn, postProcessFn)
     highlight.toggle_grey_text()
@@ -65,7 +47,7 @@ end
 
 function M.selectTreeSitter()
     executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(searchFor)
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.visuallySelectNodeAtLocaiton({location.lineNum, location.colNum})

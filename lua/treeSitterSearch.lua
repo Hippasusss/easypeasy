@@ -1,5 +1,24 @@
 local M = {}
 
+M.searchFor = {
+    "if_statement",
+    "for_statement",
+    "while_statement",
+    "for_loop",
+    "while_loop",
+    "if_expression",
+
+    -- Functions/methods
+    -- "function_definition",
+    -- "method_definition",
+    "function_declaration",
+    "arrow_function",
+    -- "function",
+    "method",
+    "lambda",
+    "anonymous_function"
+}
+
 function M.searchTreeSitterRoot()
     local matches = {}
     local root = M.getRootNode()
