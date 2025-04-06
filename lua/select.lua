@@ -30,10 +30,6 @@ end
 
 function M.findAllVisibleLineStarts()
     local windowInfo = M.getWindowInfo()
-    local jumpLocationInfo = {
-        locations = {},
-        windowInfo = windowInfo,
-    }
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local matches = {}
     for linenumber, line in ipairs(lines) do
@@ -44,24 +40,19 @@ function M.findAllVisibleLineStarts()
             })
         end
     end
-    jumpLocationInfo.locations = matches
-    jumpLocationInfo.numMatches = #matches
-    return jumpLocationInfo
+    return matches
 end
 
 function M.findKeyLocationsInViewPort(key)
     local windowInfo = M.getWindowInfo()
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
-    local jumpLocationInfo = {
-        locations = {},
-        windowInfo = windowInfo,
-    }
+    local matches = {}
 
     for linenumber, line in ipairs(lines) do
         for charColNum = 1, #line do
             local lineKey = line:sub(charColNum,charColNum)
             if lineKey == key then
-                table.insert(jumpLocationInfo.locations,
+                table.insert(matches,
                     {
                         linenumber + windowInfo.first_line - 1,
                         charColNum
@@ -69,7 +60,7 @@ function M.findKeyLocationsInViewPort(key)
             end
         end
     end
-    return jumpLocationInfo
+    return matches
 end
 
 return M
