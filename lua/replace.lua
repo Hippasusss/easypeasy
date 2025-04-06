@@ -24,18 +24,16 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
     for i, location in ipairs(jumpLocationInfo.locations) do
         local relLineNum = location[1]
         local absLineNum = firstLine + relLineNum - 1
-        local charColNums = location[2]
+        local charColNum = location[2]
 
-        for j, colNum in ipairs(charColNums) do
-            local replacementString = M.generate_replacement_string(counter, jumpLocationInfo.numMatches)
-            table.insert(replacementChars,
-                {
-                    lineNum = absLineNum,
-                    colNum = colNum,
-                    replacementString = replacementString
-                })
-            counter = counter + 1
-        end
+        local replacementString = M.generate_replacement_string(counter, #jumpLocationInfo.locations)
+        table.insert(replacementChars,
+            {
+                lineNum = absLineNum,
+                colNum = charColNum,
+                replacementString = replacementString
+            })
+        counter = counter + 1
     end
     jumpLocationInfo.locations = replacementChars
     return jumpLocationInfo
