@@ -19,12 +19,11 @@ function M.createJumpLocations(locations, numMatches)
     }
 end
 
-function M.makeAbsoluteLocationsRelative(jumpLocationInfo)
-    for i, location in pairs(jumpLocationInfo.locations) do
-        if location[1] < jumpLocationInfo.windowInfo.first_line or location[1] > jumpLocationInfo.windowInfo.last_line then
+function M.trimLocationsToWindow(jumpLocationInfo)
+    for i, location in ipairs(jumpLocationInfo.locations) do
+        if (location[1] < jumpLocationInfo.windowInfo.first_line) or (location[1] > jumpLocationInfo.windowInfo.last_line) then
             table.remove(jumpLocationInfo.locations, i)
         end
-        location[1] = location[1] - jumpLocationInfo.windowInfo.first_line + 1
     end
     return jumpLocationInfo
 end

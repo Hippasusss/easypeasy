@@ -52,7 +52,7 @@ function M.highlightJumpLocations(jumpLocationInfo)
             charNumber - 1,
             {
                 hl_group = 'EasyPeasyMain',
-                end_col = charNumber-1,
+                end_col = charNumber - 1,
                 virt_text = {{firstChar, 'EasyPeasyMain'}},
                 virt_text_pos = 'overlay',
                 priority = 1000,
@@ -78,7 +78,6 @@ function M.highlightJumpLocations(jumpLocationInfo)
     M.forceDraw()
     return jumpLocationInfo
 end
-
 
 function M.toggle_grey_text()
     if next(originalHL) == nil then
@@ -181,7 +180,7 @@ function M.InteractiveSearch()
             end
         end
 
-        vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2][1] - 1})
+        vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2] - 1})
     end
 
     local function handleTab(down)
@@ -194,7 +193,6 @@ function M.InteractiveSearch()
         for i = down and 1 or #matches, down and #matches or 1, down and 1 or -1 do
             if compare(matches[i][1], edgeVisibleLine) then
                 nextMatch = matches[i];
-                print (vim.inspect(nextMatch[1]))
                 break
             end
         end
@@ -204,7 +202,7 @@ function M.InteractiveSearch()
         end
 
         if nextMatch then
-            vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2][1] - 1})
+            vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2] - 1})
         end
     end
 
