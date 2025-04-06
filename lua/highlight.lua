@@ -111,6 +111,7 @@ function M.toggle_grey_text()
         end
         originalHL = {}
     end
+    M.clearHighlights()
     M.forceDraw()
 end
 
@@ -161,7 +162,7 @@ function M.InteractiveSearch()
                     matchEndCol
                 )
 
-                table.insert(matches, {lineNum, {matchStartCol + 1}})
+                table.insert(matches, {lineNum, matchStartCol + 1})
                 startIdx = matchEndCol
                 if startIdx >= #line then break end
             end
@@ -197,8 +198,6 @@ function M.InteractiveSearch()
                 break
             end
         end
-        print("edgeVisibel: " ..  edgeVisibleLine)
-        print("nextMatch: " .. vim.inspect(nextMatch))
 
         if not nextMatch or nextMatch[1] == vim.fn.line('.') then
             nextMatch = down and matches[1] or matches[#matches]
@@ -208,7 +207,6 @@ function M.InteractiveSearch()
             vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2][1] - 1})
         end
     end
-
 
     M.clearHighlights(buf)
 

@@ -39,7 +39,7 @@ function M.findAllVisibleLineStarts()
         if line:match("^%s*$") == nil then
             table.insert(matches, {
                 linenumber ,
-                { 1 }
+                1
             })
         end
     end
@@ -54,7 +54,6 @@ function M.findKeyLocationsInViewPort(key)
     local jumpLocationInfo = {
         locations = {},
         windowInfo = windowInfo,
-        numMatches = 0
     }
 
     for linenumber, line in ipairs(lines) do
@@ -63,15 +62,16 @@ function M.findKeyLocationsInViewPort(key)
             local lineKey = line:sub(charColNum,charColNum)
             if lineKey == key then
                 table.insert(charColNums, charColNum)
-                jumpLocationInfo.numMatches = jumpLocationInfo.numMatches + 1
             end
         end
         if #charColNums > 0 then
-            table.insert(jumpLocationInfo.locations,
-                {
-                    linenumber,
-                    charColNums
-                })
+            for i, colNum in ipairs(charColNums) do
+                table.insert(jumpLocationInfo.locations,
+                    {
+                        linenumber,
+                        colNum
+                    })
+            end
         end
     end
     return jumpLocationInfo
