@@ -162,7 +162,7 @@ function M.InteractiveSearch()
                     matchEndCol
                 )
 
-                table.insert(matches, {lineNum, {matchStartCol + 1}})
+                table.insert(matches, {lineNum, matchStartCol + 1})
                 startIdx = matchEndCol
                 if startIdx >= #line then break end
             end
@@ -207,7 +207,6 @@ function M.InteractiveSearch()
             vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2][1] - 1})
         end
     end
-
 
     M.clearHighlights(buf)
 
