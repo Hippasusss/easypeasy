@@ -54,7 +54,5 @@ function M.selectTreeSitter()
         end)
 end
 
-vim.keymap.set("n", "<leader>t", function() require("easypeasy").selectTreeSitter() end)
-
 return M
 
