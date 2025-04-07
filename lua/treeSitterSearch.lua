@@ -107,6 +107,10 @@ function M.deleteNodeAtStartLocation(location)
     runTreesitterCommand(location, 'd')
 end
 
+function M.commandNodeAtStartLocation(location, command)
+    runTreesitterCommand(location, command)
+end
+
 function M.getRootNode()
     local buf = vim.api.nvim_get_current_buf()
     local parser = vim.treesitter.get_parser(buf)

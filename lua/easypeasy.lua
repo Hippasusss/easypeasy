@@ -57,32 +57,44 @@ function M.searchLines()
     executeSearch(select.findAllVisibleLineStarts)
 end
 
-function M.selectTreeSitter()
+function M.selectTreeSitter(returnCursor)
+    returnCursor = returnCursor or false
     executeSearch(function()
         local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.visuallySelectNodeAtLocation({location.lineNum, location.colNum})
-        end)
+        end, returnCursor)
 end
 
-function M.yankTreeSitter()
+function M.yankTreeSitter(returnCursor)
+    returnCursor = returnCursor or true
     executeSearch(function()
         local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.yankNodeAtStartLocation({location.lineNum, location.colNum})
-        end, true)
+        end, returnCursor)
 end
 
-function M.deleteTreeSitter()
+function M.deleteTreeSitter(returnCursor)
+    returnCursor = returnCursor or true
     executeSearch(function()
         local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.deleteNodeAtStartLocation({location.lineNum, location.colNum})
-        end, true)
+        end, returnCursor)
 end
 
+function M.commandTreeSitter(command, returnCursor)
+    returnCursor = returnCursor or true
+    executeSearch(function()
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
+        return treeSitterSearch.getNodeLocations(replacementNodes)
+    end, function(location)
+            treeSitterSearch.deleteNodeAtStartLocation({location.lineNum, location.colNum})
+        end, returnCursor)
+end
 return M
 
