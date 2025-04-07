@@ -209,7 +209,7 @@ function M.InteractiveSearch()
     M.clearHighlights(buf)
 
     local function redrawPrompt()
-        vim.api.nvim_echo({{'Search: '..query, 'EasyPeasySearch'}}, true, {})
+        vim.api.nvim_echo({{'Search: '..query, 'EasyPeasySearch'}}, false, {})
         M.forceDraw(true)
     end
 
