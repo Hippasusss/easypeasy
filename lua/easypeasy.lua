@@ -8,8 +8,16 @@ local treeSitterSearch = require("treeSitterSearch")
 
 local M = {}
 
-local function executeSearch(getLocationsFn, postProcessFn)
+local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     highlight.toggle_grey_text()
+
+    restore_cursor = false or restore_cursor
+    local scrolloff = vim.opt.scrolloff
+    if restore_cursor then
+        vim.opt.scrolloff = 0
+    end
+    local original_pos = restore_cursor and vim.api.nvim_win_get_cursor(0) or nil
+
     local success, replacementLocations = pcall(getLocationsFn)
     local ok, err = pcall(function()
         if success and replacementLocations then
@@ -27,6 +35,10 @@ local function executeSearch(getLocationsFn, postProcessFn)
             vim.api.nvim_echo({{success and 'Exited' or 'Error: '..tostring(replacementLocations), 'WarningMsg'}}, true, {})
         end
     end)
+    if restore_cursor and original_pos then
+        pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
+        vim.opt.scrolloff = scrolloff
+    end
     highlight.toggle_grey_text()
 end
 
@@ -50,8 +62,26 @@ function M.selectTreeSitter()
         local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
-            treeSitterSearch.visuallySelectNodeAtLocaiton({location.lineNum, location.colNum})
+            treeSitterSearch.visuallySelectNodeAtLocation({location.lineNum, location.colNum})
         end)
+end
+
+function M.yankTreeSitter()
+    executeSearch(function()
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
+        return treeSitterSearch.getNodeLocations(replacementNodes)
+    end, function(location)
+            treeSitterSearch.yankNodeAtStartLocation({location.lineNum, location.colNum})
+        end, true)
+end
+
+function M.deleteTreeSitter()
+    executeSearch(function()
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
+        return treeSitterSearch.getNodeLocations(replacementNodes)
+    end, function(location)
+            treeSitterSearch.deleteNodeAtStartLocation({location.lineNum, location.colNum})
+        end, true)
 end
 
 return M

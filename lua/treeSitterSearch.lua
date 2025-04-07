@@ -82,18 +82,29 @@ function M.getNodeRangeFromLocation(location)
     return traverse(root)
 end
 
-function M.visuallySelectNodeAtLocaiton(location)
+local function runTreesitterCommand(location, postAction)
     local rangeLocation = M.getNodeRangeFromLocation(location)
     if rangeLocation == nil then return end
+
     vim.api.nvim_win_set_cursor(0, {rangeLocation[3], rangeLocation[4]})
-    vim.api.nvim_command('normal! v')
+    vim.api.nvim_command('normal! V')
     vim.api.nvim_win_set_cursor(0, {rangeLocation[1], rangeLocation[2]})
+
+    if postAction then
+        vim.api.nvim_command('normal! ' .. postAction)
+    end
 end
 
-function M.yankNodeAtStartLocation(lineNum, colNum)
+function M.visuallySelectNodeAtLocation(location)
+    runTreesitterCommand(location, nil)
 end
 
-function M.deleteNodeAtStartLocation(lineNum, colNum)
+function M.yankNodeAtStartLocation(location)
+    runTreesitterCommand(location, 'y')
+end
+
+function M.deleteNodeAtStartLocation(location)
+    runTreesitterCommand(location, 'd')
 end
 
 function M.getRootNode()
