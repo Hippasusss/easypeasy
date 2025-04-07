@@ -10,8 +10,5 @@ end
 local ns = vim.api.nvim_create_namespace('interactive_search')
 local search_hl = vim.api.nvim_buf_add_highlight
 
-function M.askForString(message)
-    -- vim.fn.input()
-end
 
 return M
