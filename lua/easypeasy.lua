@@ -93,7 +93,7 @@ function M.commandTreeSitter(command, returnCursor)
         local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
-            treeSitterSearch.deleteNodeAtStartLocation({location.lineNum, location.colNum})
+            treeSitterSearch.commandNodeAtStartLocation({location.lineNum, location.colNum}, command)
         end, returnCursor)
 end
 return M
