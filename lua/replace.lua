@@ -15,8 +15,8 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
     local replacementChars = {}
 
     table.sort(jumpLocationInfo.locations, function(a, b)
-        local distLineA = math.abs(a[1] - cursorPosLine - firstLine + 1)
-        local distLineB = math.abs(b[1] - cursorPosLine - firstLine + 1)
+        local distLineA = math.abs(a[1] - cursorPosLine)
+        local distLineB = math.abs(b[1] - cursorPosLine)
         local distColA = math.abs(a[2] - cursorPosCol)
         local distColB = math.abs(b[2] - cursorPosCol)
         local returnVal = false
