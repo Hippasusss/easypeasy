@@ -17,6 +17,7 @@ M.searchFor = {
     "function_definition",
     "method_definition",
     "function_declaration",
+    "function_call",
     "arrow_function",
     "function",
     "method",
@@ -24,6 +25,7 @@ M.searchFor = {
     "anonymous_function",
     "field_declaration",
     "field",
+    "assignment",
 }
 
 function M.searchTreeSitterRoot()
@@ -98,7 +100,7 @@ local function runTreesitterCommand(location, postAction)
     vim.api.nvim_win_set_cursor(0, {rangeLocation[1], rangeLocation[2]})
 
     if postAction then
-        vim.api.nvim_command('normal! ' .. postAction)
+        vim.api.nvim_feedkeys(postAction, 'xv', false)
     end
 end
 
