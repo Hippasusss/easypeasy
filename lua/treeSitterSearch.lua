@@ -7,16 +7,23 @@ M.searchFor = {
     "for_loop",
     "while_loop",
     "if_expression",
+    "switch_statement",
+    "switch",
+    "if",
+    "for",
+    "while",
 
     -- Functions/methods
-    -- "function_definition",
-    -- "method_definition",
+    "function_definition",
+    "method_definition",
     "function_declaration",
     "arrow_function",
-    -- "function",
+    "function",
     "method",
     "lambda",
-    "anonymous_function"
+    "anonymous_function",
+    "field_declaration",
+    "field",
 }
 
 function M.searchTreeSitterRoot()
