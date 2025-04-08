@@ -100,7 +100,7 @@ local function runTreesitterCommand(location, postAction)
     vim.api.nvim_win_set_cursor(0, {rangeLocation[1], rangeLocation[2]})
 
     if postAction then
-        vim.api.nvim_feedkeys(postAction, 'xv', false)
+        vim.api.nvim_feedkeys(postAction, 'xm', false)
     end
 end
 

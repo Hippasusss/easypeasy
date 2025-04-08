@@ -15,12 +15,14 @@ A Lua rewrite of vim-easymotion that avoids buffer swapping to maintain better L
     {
         "Hippasusss/easypeasy",
         keys = {
-            {"s", function() require("easypeasy").searchSingleCharacter() end, desc = "Search for character and then jump"},
-            { "/", function() require("easypeasy").searchMultipleCharacters() end, desc = "Search for regex and then jump"},
-            { "<leader>z", function() require("easypeasy").searchLiness() end, desc = "Search lines" },
-            { "<leader>tt", function() require("easypeasy").selectTreeSitter() end, desc = "Search and then visualy select treesitter nodes"},
-            { "<leader>ty", function() require("easypeasy").yankTreeSitter() end, desc = "Search and then yank treesitter nodes"},
-            { "<leader>td", function() require("easypeasy").deleteTreeSitter() end, desc = "Search and then delete treesitter nodes"},
+            {"s", function() require("easypeasy").searchSingleCharacter() end, mode = {"n","v"}},
+            { "/", function() require("easypeasy").searchMultipleCharacters() end},
+            { "<leader>z", function() require("easypeasy").searchLines() end, mode = {"n","v"}},
+            { "<leader>tt", function() require("easypeasy").selectTreeSitter() end, mode = {"n",}},
+            { "<leader>ty", function() require("easypeasy").yankTreeSitter() end, mode = {"n",}},
+            { "<leader>td", function() require("easypeasy").deleteTreeSitter() end, mode = {"n",}},
+            { "<leader>tw", function() require("easypeasy").commandTreeSitter('gc') end, mode = {"n"}},
+        },
     },
 ```
 
