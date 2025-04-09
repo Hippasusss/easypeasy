@@ -25,7 +25,7 @@ M.searchFor = {
     "anonymous_function",
     "field_declaration",
     "field",
-    "assignment",
+    "assignment_statement",
 }
 
 function M.searchTreeSitterRoot()

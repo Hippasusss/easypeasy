@@ -43,7 +43,7 @@ function M.highlightJumpLocations(jumpLocationInfo)
         local charNumber = location.colNum
         local replacementString = location.replacementString
         local firstChar = replacementString:sub(1, 1)
-        local restChars = replacementString:sub(2)
+        local restChars = replacementString:sub(2, 2)
 
         vim.api.nvim_buf_set_extmark(
             buf,
