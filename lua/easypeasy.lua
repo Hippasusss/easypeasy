@@ -36,8 +36,8 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
         end
     end)
     if restore_cursor and original_pos then
-        pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
         vim.opt.scrolloff = scrolloff
+        pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
     end
     highlight.toggle_grey_text()
 end
