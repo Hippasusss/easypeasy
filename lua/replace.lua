@@ -27,7 +27,7 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
         end
     end)
 
-    local replacementString = M.generate_replacement_strings(#jumpLocationInfo.locations)
+    local replacementString = M.generateReplacementStrings(#jumpLocationInfo.locations)
     for i, location in ipairs(jumpLocationInfo.locations) do
         local lineNum = location[1]
         local colNum = location[2]
@@ -43,92 +43,51 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
     return jumpLocationInfo
 end
 
-function M.generate_replacement_strings(numMatches)
-    local function SCTree(targetCount)
-        local groups = {}
-        local keysCount = {}
+function M.generateReplacementStrings(numMatches)
+    local function buildTree(targets)
+        local groups, counts = {}, {}
+        for i = 1, #M.characterMap do counts[i] = 0 end
+        local remaining = targets
 
-        for i = 1, #M.characterMap do
-            keysCount[i] = 0
-        end
-
-        local remainingTargetsCount = targetCount
-        local level = 0
-        while remainingTargetsCount > 0 do
+        for level = 0, math.huge do
+            --forward for single keys, back wards for prefix keys
             local childCount = (level == 0) and 1 or (#M.characterMap - 1)
-            for i = level == 0 and 1 or #M.characterMap, level==0 and #M.characterMap or 1, level==0 and 1 or -1 do
-                keysCount[i] = keysCount[i] + childCount
-                remainingTargetsCount = remainingTargetsCount - childCount
-                if remainingTargetsCount <= 0 then
-                    keysCount[i] = keysCount[i] + remainingTargetsCount
-                    break
-                end
+            local step = level == 0 and 1 or -1
+            local start = level == 0 and 1 or #M.characterMap
+            for i = start, start + (#M.characterMap - 1) * step, step do
+                local alloc = math.min(childCount, remaining)
+                counts[i] = counts[i] + alloc
+                remaining = remaining - alloc
+                if remaining <= 0 then break end
             end
-            level = level + 1
+            if remaining <= 0 then break end
         end
 
-        local targetIndex = 1
-        for i = 1, #M.characterMap do
-            local count = keysCount[i]
-            if count > 1 then
-                groups[M.characterMap[i]] = SCTree(count)
-            elseif count == 1 then
-                groups[M.characterMap[i]] = targetIndex
-            end
-            targetIndex = targetIndex + count
+        local index = 1
+        for i, char in ipairs(M.characterMap) do
+            local count = counts[i]
+            groups[char] = count > 1 and buildTree(count) or index
+            index = index + count
         end
-
         return groups
     end
 
-    local groups = SCTree(numMatches)
-
     local replacements = {}
-    local counter = 1
-    local function flatten(group, prefix)
+    local function flatten(tree, prefix)
         prefix = prefix or ""
-        for i = 1, #M.characterMap do
-            local currentKey = M.characterMap[i]
-            local replacement = group[currentKey]
-            if replacement then
-                if type(replacement) == "table" then
-                    flatten(replacement, prefix .. currentKey)
+        for _, char in ipairs(M.characterMap) do
+            local val = tree[char]
+            if val then
+                if type(val) == "table" then
+                    flatten(val, prefix..char)
                 else
-                    replacements[counter] = prefix .. currentKey
-                    counter = counter + 1
+                    replacements[#replacements+1] = prefix..char
                 end
             end
         end
     end
-    flatten(groups)
-
-    -- Ensure sequential numbering
-    local result = {}
-    for i = 1, numMatches do
-        result[i] = replacements[i]
-    end
-
-    return result
+    flatten(buildTree(numMatches))
+    return {unpack(replacements, 1, numMatches)}
 end
 
--- function M.generate_replacement_strings(numMatches)
---
---     -- Calculate character distribution
---     local numDoubleChars = math.max(0, math.floor(( numMatches - #M.characterMap) / #M.characterMap))
---     local numRegularChars = #M.characterMap - numDoubleChars - 1
---
---     local result = {}
---     for i = 1, numMatches-numDoubleChars do
---         result[i] = M.characterMap[i]
---     end
---
---     local doubleIndex = #M.characterMap
---     for i = 1, numMatches do
---         local prefixChar = M.characterMap[#M.characterMap - (math.floor(i / #M.characterMap))]
---         local secondChar = M.characterMap[i % #M.characterMap + 1]
---         result[numRegularChars + i] =  prefixChar .. secondChar
---     end
---
---     return result
--- end
 return M
