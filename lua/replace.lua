@@ -48,21 +48,17 @@ function M.generate_replacement_strings(numMatches)
         local groups = {}
         local keysCount = {}
 
-        -- Initialize keys count
         for i = 1, #M.characterMap do
             keysCount[i] = 0
         end
 
-        -- Calculate distribution
         local remainingTargetsCount = targetCount
         local level = 0
         while remainingTargetsCount > 0 do
             local childCount = (level == 0) and 1 or (#M.characterMap - 1)
-
-            for i = 1, #M.characterMap do
+            for i = level == 0 and 1 or #M.characterMap, level==0 and #M.characterMap or 1, level==0 and 1 or -1 do
                 keysCount[i] = keysCount[i] + childCount
                 remainingTargetsCount = remainingTargetsCount - childCount
-
                 if remainingTargetsCount <= 0 then
                     keysCount[i] = keysCount[i] + remainingTargetsCount
                     break
@@ -71,7 +67,6 @@ function M.generate_replacement_strings(numMatches)
             level = level + 1
         end
 
-        -- Build groups
         local targetIndex = 1
         for i = 1, #M.characterMap do
             local count = keysCount[i]
@@ -87,22 +82,25 @@ function M.generate_replacement_strings(numMatches)
     end
 
     local groups = SCTree(numMatches)
-    print(vim.inspect(groups))
 
-    -- Flatten into replacement strings
     local replacements = {}
-    local function flatten(g, prefix)
+    local counter = 1
+    local function flatten(group, prefix)
         prefix = prefix or ""
-        for k, v in pairs(g) do
-            if type(v) == "table" then
-                flatten(v, prefix .. k)
-            else
-                replacements[v] = prefix .. k
+        for i = 1, #M.characterMap do
+            local currentKey = M.characterMap[i]
+            local replacement = group[currentKey]
+            if replacement then
+                if type(replacement) == "table" then
+                    flatten(replacement, prefix .. currentKey)
+                else
+                    replacements[counter] = prefix .. currentKey
+                    counter = counter + 1
+                end
             end
         end
     end
     flatten(groups)
-    print(vim.inspect(replacements))
 
     -- Ensure sequential numbering
     local result = {}
