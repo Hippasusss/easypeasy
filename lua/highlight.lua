@@ -3,7 +3,7 @@ local M = {}
 M.original_hl = vim.api.nvim_get_hl(0, { name = 'Normal' })
 M.fadedKeyColor = '#808080'
 M.primarySelectorKeyColor = '#D6281C'
-M.secondarySelectorKeyColor = '#B35D27'
+M.secondarySelectorKeyColor = '#d9d752'
 M.searchMatchColor = '#99F78B'
 
 vim.api.nvim_set_hl(0, 'EasyPeasyMain', {
