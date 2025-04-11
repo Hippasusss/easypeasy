@@ -80,14 +80,6 @@ function M.visuallySelectNodeAtLocation(location)
     runTreesitterCommand(location, nil)
 end
 
-function M.yankNodeAtStartLocation(location)
-    runTreesitterCommand(location, 'y')
-end
-
-function M.deleteNodeAtStartLocation(location)
-    runTreesitterCommand(location, 'd')
-end
-
 function M.commandNodeAtStartLocation(location, command)
     runTreesitterCommand(location, command)
 end

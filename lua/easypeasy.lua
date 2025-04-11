@@ -80,32 +80,6 @@ function M.selectTreeSitter(returnCursor)
         end, returnCursor)
 end
 
---- Yank Tree-sitter node matching search criteria
---- @param returnCursor boolean|nil Whether to return cursor to original position (default: true)
---- @return nil
-function M.yankTreeSitter(returnCursor)
-    returnCursor = returnCursor or true
-    executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
-        return treeSitterSearch.getNodeLocations(replacementNodes)
-    end, function(location)
-            treeSitterSearch.yankNodeAtStartLocation({location.lineNum, location.colNum})
-        end, returnCursor)
-end
-
---- Delete Tree-sitter node matching search criteria
---- @param returnCursor boolean|nil Whether to return cursor to original position (default: true)
---- @return nil
-function M.deleteTreeSitter(returnCursor)
-    returnCursor = returnCursor or true
-    executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
-        return treeSitterSearch.getNodeLocations(replacementNodes)
-    end, function(location)
-            treeSitterSearch.deleteNodeAtStartLocation({location.lineNum, location.colNum})
-        end, returnCursor)
-end
-
 --- Execute command on Tree-sitter node matching search criteria
 --- @param command string The command to execute
 --- @param returnCursor boolean|nil Whether to return cursor to original position (default: true)
