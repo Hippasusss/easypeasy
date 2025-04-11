@@ -46,6 +46,7 @@ local default_options = {
     primarySelectorKeyColor = '#D6281C',
     secondarySelectorKeyColor = '#d9d752',
     searchMatchColor = '#99F78B',
+    tsSelectionMode = 'v'
 }
 
 

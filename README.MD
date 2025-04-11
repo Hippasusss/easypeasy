@@ -60,6 +60,9 @@ opts = {
     primarySelectorKeyColor = '#D6281C',
     secondarySelectorKeyColor = '#d9d752',
     searchMatchColor = '#99F78B',
+
+    -- Selection
+    tsSelectionMode = 'v' --'V' for visual line
 }
 ```
 

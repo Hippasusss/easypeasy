@@ -1,3 +1,4 @@
+local config = require("config")
 local M = {}
 
 function M.searchTreeSitterRoot()
@@ -68,7 +69,7 @@ local function runTreesitterCommand(location, postAction)
     if rangeLocation == nil then return end
 
     vim.api.nvim_win_set_cursor(0, {rangeLocation[3], rangeLocation[4]})
-    vim.api.nvim_command('normal! V')
+    vim.api.nvim_command('normal! ' .. config.options.tsSelectionMode)
     vim.api.nvim_win_set_cursor(0, {rangeLocation[1], rangeLocation[2]})
 
     if postAction then
