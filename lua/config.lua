@@ -1,6 +1,15 @@
 
 M = {}
 
+
+--- Default configuration options for EasyPeasy
+-- @table default_options
+-- @field characterMap table List of characters to use for key mappings
+-- @field treesitterSearchFilter table List of treesitter node types to search for
+-- @field fadedKeyColor string Hex color for faded keys
+-- @field primarySelectorKeyColor string Hex color for primary selector keys
+-- @field secondarySelectorKeyColor string Hex color for secondary selector keys
+-- @field searchMatchColor string Hex color for search matches
 local default_options = {
     characterMap = {
         'a', 's', 'd', 'g', 'h','k', 'l', 'q', 'w', 'e',
@@ -38,6 +47,7 @@ local default_options = {
     secondarySelectorKeyColor = '#d9d752',
     searchMatchColor = '#99F78B',
 }
+
 
 M.options = {}
 
