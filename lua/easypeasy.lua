@@ -8,6 +8,10 @@ local treeSitterSearch = require("treeSitterSearch")
 
 local M = {}
 
+--- Execute a search operation with optional post-processing
+--- @param getLocationsFn function Function that returns locations to search
+--- @param postProcessFn function|nil Optional function to process selected location
+--- @param restore_cursor boolean|nil Whether to restore cursor position (default: false)
 local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     highlight.toggle_grey_text()
 
@@ -42,6 +46,8 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     highlight.toggle_grey_text()
 end
 
+--- Search for a single character in viewport
+--- @return nil
 function M.searchSingleCharacter()
     executeSearch(function()
         local key = input.askForKey("Search For Key: ")
@@ -49,14 +55,21 @@ function M.searchSingleCharacter()
     end)
 end
 
+--- Search for multiple characters interactively
+--- @return nil
 function M.searchMultipleCharacters()
     executeSearch(highlight.InteractiveSearch)
 end
 
+--- Search for all visible line starts
+--- @return nil
 function M.searchLines()
     executeSearch(select.findAllVisibleLineStarts)
 end
 
+--- Select Tree-sitter node matching search criteria
+--- @param returnCursor boolean|nil Whether to return cursor to original position (default: false)
+--- @return nil
 function M.selectTreeSitter(returnCursor)
     returnCursor = returnCursor or false
     executeSearch(function()
@@ -67,6 +80,9 @@ function M.selectTreeSitter(returnCursor)
         end, returnCursor)
 end
 
+--- Yank Tree-sitter node matching search criteria
+--- @param returnCursor boolean|nil Whether to return cursor to original position (default: true)
+--- @return nil
 function M.yankTreeSitter(returnCursor)
     returnCursor = returnCursor or true
     executeSearch(function()
@@ -77,6 +93,9 @@ function M.yankTreeSitter(returnCursor)
         end, returnCursor)
 end
 
+--- Delete Tree-sitter node matching search criteria
+--- @param returnCursor boolean|nil Whether to return cursor to original position (default: true)
+--- @return nil
 function M.deleteTreeSitter(returnCursor)
     returnCursor = returnCursor or true
     executeSearch(function()
@@ -87,6 +106,10 @@ function M.deleteTreeSitter(returnCursor)
         end, returnCursor)
 end
 
+--- Execute command on Tree-sitter node matching search criteria
+--- @param command string The command to execute
+--- @param returnCursor boolean|nil Whether to return cursor to original position (default: true)
+--- @return nil
 function M.commandTreeSitter(command, returnCursor)
     returnCursor = returnCursor or true
     executeSearch(function()
