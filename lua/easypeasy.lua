@@ -3,8 +3,8 @@ local select = require("select")
 local replace = require("replace")
 local jump = require("jump")
 local input = require("input")
-local helper = require("helper")
 local treeSitterSearch = require("treeSitterSearch")
+local config = require("config")
 
 local M = {}
 
@@ -73,7 +73,7 @@ end
 function M.selectTreeSitter(returnCursor)
     returnCursor = returnCursor or false
     executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.visuallySelectNodeAtLocation({location.lineNum, location.colNum})
@@ -86,7 +86,7 @@ end
 function M.yankTreeSitter(returnCursor)
     returnCursor = returnCursor or true
     executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.yankNodeAtStartLocation({location.lineNum, location.colNum})
@@ -99,7 +99,7 @@ end
 function M.deleteTreeSitter(returnCursor)
     returnCursor = returnCursor or true
     executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.deleteNodeAtStartLocation({location.lineNum, location.colNum})
@@ -113,11 +113,15 @@ end
 function M.commandTreeSitter(command, returnCursor)
     returnCursor = returnCursor or true
     executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(treeSitterSearch.searchFor)
+        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
         return treeSitterSearch.getNodeLocations(replacementNodes)
     end, function(location)
             treeSitterSearch.commandNodeAtStartLocation({location.lineNum, location.colNum}, command)
         end, returnCursor)
 end
-return M
 
+function M.setup(opts)
+    -- FIX: No idea why this needs to be set here. should just work setting inside the funciton 
+    config.options = config.setOptions(opts)
+end
+return M

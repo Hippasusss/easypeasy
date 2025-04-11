@@ -1,38 +1,13 @@
+local config = require("config")
 local M = {}
 
-M.original_hl = vim.api.nvim_get_hl(0, { name = 'Normal' })
-M.fadedKeyColor = '#808080'
-M.primarySelectorKeyColor = '#D6281C'
-M.secondarySelectorKeyColor = '#d9d752'
-M.searchMatchColor = '#99F78B'
-
-vim.api.nvim_set_hl(0, 'EasyPeasyMain', {
-    fg = M.primarySelectorKeyColor,
-    special = M.primarySelectorKeyColor,
-    default = false,
-    bold = true,
-})
-vim.api.nvim_set_hl(0, 'EasyPeasySecondary', {
-    fg = M.secondarySelectorKeyColor,
-    special = M.secondarySelectorKeyColor,
-    default = false,
-    bold = true,
-})
-vim.api.nvim_set_hl(0, 'EasyPeasySearch', {
-    fg = M.searchMatchColor,
-    special = M.searchMatchColor,
-    default = false,
-    bold = true,
-})
 
 local originalHL = {}
-
 local EXCLUDE_GROUPS = {
     ['EasyPeasyMain'] = true,
     ['EasyPeasySecondary'] = true,
     ['EasyPeasySearch'] = true
 }
-
 local colorNameSpace = vim.api.nvim_create_namespace('easypeasy')
 
 function M.highlightJumpLocations(jumpLocationInfo)
@@ -87,7 +62,7 @@ function M.toggle_grey_text()
                 if hl and not hl.link then
                     originalHL[name] = vim.deepcopy(hl)
                     vim.api.nvim_set_hl(0, name, {
-                        fg = M.fadedKeyColor,
+                        fg = config.options.fadedKeyColor,
                         bg = hl.bg,
                     })
 
@@ -112,6 +87,9 @@ function M.toggle_grey_text()
     end
     M.clearHighlights()
     M.forceDraw()
+end
+
+function M.updateHighlights()
 end
 
 function M.forceDraw(immediate)

@@ -1,10 +1,6 @@
-local M = {}
+local config = require("config")
 
-M.characterMap = {
-    'a', 's', 'd', 'g', 'h','k', 'l', 'q', 'w', 'e',
-    'r', 't', 'y', 'u', 'i', 'o','p', 'z', 'x', 'c',
-    'v', 'b', 'n', 'm','f', 'j', ';'
-}
+local M = {}
 
 function M.calculateReplacementCharacters(jumpLocationInfo)
     if jumpLocationInfo == nil then return nil end
@@ -46,15 +42,15 @@ end
 function M.generateReplacementStrings(numMatches)
     local function buildTree(targets)
         local groups, counts = {}, {}
-        for i = 1, #M.characterMap do counts[i] = 0 end
+        for i = 1, #config.options.characterMap do counts[i] = 0 end
         local remaining = targets
 
         for level = 0, math.huge do
             --forward for single keys, back wards for prefix keys
-            local childCount = (level == 0) and 1 or (#M.characterMap - 1)
+            local childCount = (level == 0) and 1 or (#config.options.characterMap - 1)
             local step = level == 0 and 1 or -1
-            local start = level == 0 and 1 or #M.characterMap
-            for i = start, start + (#M.characterMap - 1) * step, step do
+            local start = level == 0 and 1 or #config.options.characterMap
+            for i = start, start + (#config.options.characterMap - 1) * step, step do
                 local alloc = math.min(childCount, remaining)
                 counts[i] = counts[i] + alloc
                 remaining = remaining - alloc
@@ -64,7 +60,7 @@ function M.generateReplacementStrings(numMatches)
         end
 
         local index = 1
-        for i, char in ipairs(M.characterMap) do
+        for i, char in ipairs(config.options.characterMap) do
             local count = counts[i]
             groups[char] = count > 1 and buildTree(count) or index
             index = index + count
@@ -75,7 +71,7 @@ function M.generateReplacementStrings(numMatches)
     local replacements = {}
     local function flatten(tree, prefix)
         prefix = prefix or ""
-        for _, char in ipairs(M.characterMap) do
+        for _, char in ipairs(config.options.characterMap) do
             local val = tree[char]
             if val then
                 if type(val) == "table" then
