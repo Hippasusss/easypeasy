@@ -41,10 +41,12 @@ local default_options = {
         "variable_declaration",
         "field",
         "assignment_statement",
+        "expression_statement",
+        "declaration",
     },
     fadedKeyColor = '#808080',
     primarySelectorKeyColor = '#D6281C',
-    secondarySelectorKeyColor = '#d9d752',
+    secondarySelectorKeyColor = '#fc8b98',
     searchMatchColor = '#99F78B',
     tsSelectionMode = 'v'
 }
