@@ -13,15 +13,11 @@ local M = {}
 --- @param postProcessFn function|nil Optional function to process selected location
 --- @param restore_cursor boolean|nil Whether to restore cursor position (default: false)
 local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
-    vim.cmd('normal! ix')
-    vim.cmd('normal! x')
     highlight.toggle_grey_text()
 
     restore_cursor = false or restore_cursor
     local scrolloff = vim.opt.scrolloff
-    if restore_cursor then
-        vim.opt.scrolloff = 0
-    end
+    if restore_cursor then vim.opt.scrolloff = 0 end
     local original_pos = restore_cursor and vim.api.nvim_win_get_cursor(0) or nil
 
     local success, replacementLocations = pcall(getLocationsFn)
@@ -32,10 +28,9 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
             local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(bufferJumplocations)
 
             if replacementLocationsWithCharacters then
-                local location = jump.jumpToKey(highlight.highlightJumpLocations(replacementLocationsWithCharacters))
-                if postProcessFn then
-                    postProcessFn(location)
-                end
+                local key = highlight.highlightJumpLocations(replacementLocationsWithCharacters)
+                local location = jump.jumpToKey(key)
+                if postProcessFn then postProcessFn(location) end
             end
         else
             vim.api.nvim_echo({{success and 'Exited' or 'Error: '..tostring(replacementLocations), 'WarningMsg'}}, true, {})
@@ -43,7 +38,6 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     end)
     if restore_cursor and original_pos then
         vim.opt.scrolloff = scrolloff
-        vim.cmd.undojoin()
         pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
     end
     highlight.toggle_grey_text()

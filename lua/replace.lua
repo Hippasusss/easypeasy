@@ -23,7 +23,7 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
         end
     end)
 
-    local replacementString = M.generateReplacementStrings(#jumpLocationInfo.locations)
+    local replacementStrings = M.generateReplacementStrings(#jumpLocationInfo.locations)
     for i, location in ipairs(jumpLocationInfo.locations) do
         local lineNum = location[1]
         local colNum = location[2]
@@ -32,7 +32,7 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
             {
                 lineNum = lineNum,
                 colNum = colNum,
-                replacementString = replacementString[i]
+                replacementString = replacementStrings[i]
             })
     end
     jumpLocationInfo.locations = replacementChars

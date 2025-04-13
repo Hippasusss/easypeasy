@@ -158,7 +158,7 @@ function M.InteractiveSearch()
             end
         end
 
-        vim.cmd.undojoin()
+        -- vim.cmd.undojoin()
         vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2] - 1})
     end
 
@@ -181,7 +181,7 @@ function M.InteractiveSearch()
         end
 
         if nextMatch then
-            vim.cmd.undojoin()
+            -- vim.cmd.undojoin()
             vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2] - 1})
         end
     end
