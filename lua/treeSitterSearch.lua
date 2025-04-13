@@ -68,11 +68,15 @@ local function runTreesitterCommand(location, postAction)
     local rangeLocation = M.getNodeRangeFromLocation(location)
     if rangeLocation == nil then return end
 
+    vim.cmd.undojoin()
     vim.api.nvim_win_set_cursor(0, {rangeLocation[3], rangeLocation[4]})
+    vim.cmd.undojoin()
     vim.api.nvim_command('normal! ' .. config.options.tsSelectionMode)
+    vim.cmd.undojoin()
     vim.api.nvim_win_set_cursor(0, {rangeLocation[1], rangeLocation[2]})
 
     if postAction then
+    vim.cmd.undojoin()
         vim.api.nvim_feedkeys(postAction, 'xm', false)
     end
 end

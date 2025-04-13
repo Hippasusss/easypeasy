@@ -13,6 +13,8 @@ local M = {}
 --- @param postProcessFn function|nil Optional function to process selected location
 --- @param restore_cursor boolean|nil Whether to restore cursor position (default: false)
 local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
+    vim.cmd('normal! ix')
+    vim.cmd('normal! x')
     highlight.toggle_grey_text()
 
     restore_cursor = false or restore_cursor
@@ -41,6 +43,7 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     end)
     if restore_cursor and original_pos then
         vim.opt.scrolloff = scrolloff
+        vim.cmd.undojoin()
         pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
     end
     highlight.toggle_grey_text()
