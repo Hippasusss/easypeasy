@@ -42,6 +42,8 @@ local default_options = {
         "field",
         "assignment_statement",
         "expression_statement",
+        "template_declaration",
+        "return_statement",
         "declaration",
     },
     fadedKeyColor = '#808080',
