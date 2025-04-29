@@ -12,7 +12,7 @@ function M.getWindowInfo()
     return windowInfo
 end
 
-function M.createJumpLocations(locations, numMatches)
+function M.createJumpLocations(locations)
     return {
         locations = locations,
         windowInfo = M.getWindowInfo(),

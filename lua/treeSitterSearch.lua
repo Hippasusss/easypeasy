@@ -89,7 +89,6 @@ end
 function M.getRootNode()
     local buf = vim.api.nvim_get_current_buf()
     local parser = vim.treesitter.get_parser(buf)
-    local matches = {}
     local root
     if parser then
         local tree = parser:parse()[1]

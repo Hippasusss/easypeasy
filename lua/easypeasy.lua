@@ -21,9 +21,10 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     local original_pos = restore_cursor and vim.api.nvim_win_get_cursor(0) or nil
 
     local success, replacementLocations = pcall(getLocationsFn)
+
     local ok, err = pcall(function()
         if success and replacementLocations then
-            local bufferJumplocations = select.createJumpLocations(replacementLocations, #replacementLocations)
+            local bufferJumplocations = select.createJumpLocations(replacementLocations)
             bufferJumplocations = select.trimLocationsToWindow(bufferJumplocations)
             local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(bufferJumplocations)
 
@@ -41,6 +42,7 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
         pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
     end
     highlight.toggle_grey_text()
+    if not ok then return err end
 end
 
 --- Search for a single character in viewport

@@ -7,8 +7,7 @@ function M.jumpToKey(jumpLocationInfo)
     end
 
     local char = vim.fn.getchar()
-    local key = vim.fn.nr2char(char)
-    local finalCursorLocation = jumpLocationInfo.windowInfo.cursor_pos
+    local key = type(char) == 'number' and vim.fn.nr2char(char) or char
     local filteredLocations = {}
 
     for _, location in ipairs(jumpLocationInfo.locations) do

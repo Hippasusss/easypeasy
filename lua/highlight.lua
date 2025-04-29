@@ -89,9 +89,6 @@ function M.toggle_grey_text()
     M.forceDraw()
 end
 
-function M.updateHighlights()
-end
-
 function M.forceDraw(immediate)
     immediate = immediate or 0
     if immediate then
@@ -132,7 +129,7 @@ function M.InteractiveSearch()
                 matchStartCol = matchStartCol + startIdx
                 matchEndCol = matchEndCol + startIdx
 
-                vim.api.nvim_buf_add_highlight(
+                vim.hl(
                     buf, colorNameSpace, 'EasyPeasySearch',
                     lineNum - 1,
                     matchStartCol,
@@ -158,7 +155,6 @@ function M.InteractiveSearch()
             end
         end
 
-        -- vim.cmd.undojoin()
         vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2] - 1})
     end
 
@@ -181,7 +177,6 @@ function M.InteractiveSearch()
         end
 
         if nextMatch then
-            -- vim.cmd.undojoin()
             vim.api.nvim_win_set_cursor(0, {nextMatch[1], nextMatch[2] - 1})
         end
     end
@@ -217,7 +212,7 @@ function M.InteractiveSearch()
             updateMatches()
             jumpIfNoMatchesInWindow()
         else
-            query = query .. vim.fn.nr2char(char)
+            query = query .. charStr
             updateMatches()
             jumpIfNoMatchesInWindow()
         end

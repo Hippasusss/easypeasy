@@ -5,7 +5,6 @@ local M = {}
 function M.calculateReplacementCharacters(jumpLocationInfo)
     if jumpLocationInfo == nil then return nil end
 
-    local firstLine = jumpLocationInfo.windowInfo.first_line
     local cursorPosLine = jumpLocationInfo.windowInfo.cursor_pos[1]
     local cursorPosCol = jumpLocationInfo.windowInfo.cursor_pos[2]
     local replacementChars = {}
@@ -15,7 +14,6 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
         local distLineB = math.abs(b[1] - cursorPosLine)
         local distColA = math.abs(a[2] - cursorPosCol)
         local distColB = math.abs(b[2] - cursorPosCol)
-        local returnVal = false
         if a[1] == b[1] then
             return distColA < distColB
         else
