@@ -129,11 +129,11 @@ function M.InteractiveSearch()
                 matchStartCol = matchStartCol + startIdx
                 matchEndCol = matchEndCol + startIdx
 
-                vim.hl(
+
+                vim.hl.range(
                     buf, colorNameSpace, 'EasyPeasySearch',
-                    lineNum - 1,
-                    matchStartCol,
-                    matchEndCol
+                    {lineNum - 1, matchStartCol},
+                    {lineNum - 1, matchEndCol}
                 )
 
                 table.insert(matches, {lineNum, matchStartCol + 1})
