@@ -1,6 +1,4 @@
-
-M = {}
-
+local M = {}
 
 --- Default configuration options for EasyPeasy
 -- @table default_options
