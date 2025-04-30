@@ -95,6 +95,6 @@ end
 
 function M.setup(opts)
     -- FIX: No idea why this needs to be set here. should just work setting inside the funciton 
-    config.options = config.setOptions(opts)
+    config.options = config.setAllOptions(opts)
 end
 return M
