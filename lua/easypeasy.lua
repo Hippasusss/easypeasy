@@ -94,7 +94,6 @@ function M.commandTreeSitter(command, returnCursor)
 end
 
 function M.setup(opts)
-    -- FIX: No idea why this needs to be set here. should just work setting inside the funciton 
-    config.options = config.setAllOptions(opts)
+    config.setAllOptions(opts)
 end
 return M
