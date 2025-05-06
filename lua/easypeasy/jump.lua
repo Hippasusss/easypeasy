@@ -1,4 +1,4 @@
-local highlight = require("highlight")
+local highlight = require("easypeasy.highlight")
 local M = {}
 function M.jumpToKey(jumpLocationInfo)
     if #jumpLocationInfo.locations == 1 then

@@ -1,10 +1,10 @@
-local highlight = require("highlight")
-local select = require("select")
-local replace = require("replace")
-local jump = require("jump")
-local input = require("input")
-local treeSitterSearch = require("treeSitterSearch")
-local config = require("config")
+local highlight = require("easypeasy.highlight")
+local select = require("easypeasy.select")
+local replace = require("easypeasy.replace")
+local jump = require("easypeasy.jump")
+local input = require("easypeasy.input")
+local treeSitterSearch = require("easypeasy.treeSitterSearch")
+local config = require("easypeasy.config")
 
 local M = {}
 

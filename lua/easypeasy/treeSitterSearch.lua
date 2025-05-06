@@ -1,4 +1,4 @@
-local config = require("config")
+local config = require("easypeasy.config")
 local M = {}
 
 function M.searchTreeSitterRoot()
