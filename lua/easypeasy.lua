@@ -51,9 +51,7 @@ function M.searchSingleCharacter()
     executeSearch(function()
         local key = input.askForKey("Search For Key: ")
         print(vim.inspect(key))
-        if key  ~= "\27" then
-            return select.findKeyLocationsInViewPort(key)
-        end
+        return select.findKeyLocationsInViewPort(key)
     end)
 end
 

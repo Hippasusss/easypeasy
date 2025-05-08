@@ -12,6 +12,7 @@ local colorNameSpace = vim.api.nvim_create_namespace('easypeasy')
 
 function M.highlightJumpLocations(jumpLocationInfo)
     local buf = jumpLocationInfo.buffer or 0
+    if #jumpLocationInfo == 0 then return end
 
     for _, location in pairs(jumpLocationInfo.locations) do
         local absLinenum = location.lineNum
