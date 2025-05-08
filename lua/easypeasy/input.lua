@@ -1,4 +1,4 @@
-M = {}
+local M = {}
 
 function M.askForKey(message)
     vim.api.nvim_echo({{message, 'EasyPeasySearch'}}, false, {})
