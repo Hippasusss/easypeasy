@@ -18,7 +18,7 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     restore_cursor = false or restore_cursor
     local scrolloff = vim.opt.scrolloff
     if restore_cursor then vim.opt.scrolloff = 0 end
-    local original_pos = restore_cursor and vim.api.nvim_win_get_cursor(0) or nil
+    local original_pos = vim.api.nvim_win_get_cursor(0)
 
     local success, replacementLocations = pcall(getLocationsFn)
 
@@ -37,7 +37,10 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
             vim.api.nvim_echo({{success and 'Exited' or 'Error: '..tostring(replacementLocations), 'WarningMsg'}}, true, {})
         end
     end)
-    if restore_cursor and original_pos then
+
+    -- return the cursor if requested or if the user escapes mid search
+    if (restore_cursor and original_pos) or (replacementLocations == nil) then
+        print("here")
         vim.opt.scrolloff = scrolloff
         pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
     end
