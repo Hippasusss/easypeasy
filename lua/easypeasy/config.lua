@@ -27,6 +27,7 @@ local default_options = {
         "for",
         "while",
         "function_definition",
+        "method_declaration",
         "method_definition",
         "method_declaration",
         "function_declaration",
