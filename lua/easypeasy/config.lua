@@ -26,6 +26,8 @@ local default_options = {
         "if",
         "for",
         "while",
+        "struct_declaration",
+        "class_declaration",
         "function_definition",
         "method_declaration",
         "method_definition",
