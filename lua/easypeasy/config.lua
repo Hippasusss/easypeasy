@@ -26,6 +26,8 @@ local default_options = {
         "if",
         "for",
         "while",
+        "struct_declaration",
+        "class_declaration",
         "function_definition",
         "method_declaration",
         "method_definition",
@@ -50,7 +52,7 @@ local default_options = {
     primarySelectorKeyColor = '#D6281C',
     secondarySelectorKeyColor = '#fc8b98',
     searchMatchColor = '#99F78B',
-    tsSelectionMode = 'v'
+    tsSelectionMode = 'V'
 }
 
 
