@@ -51,11 +51,12 @@ end
 --- Search for a single character in viewport
 --- @return nil
 function M.searchSingleCharacter()
-    executeSearch(function()
-        local key = input.askForKey("Search For Key: ")
-        print(vim.inspect(key))
-        return select.findKeyLocationsInViewPort(key)
-    end)
+    executeSearch(
+        function()
+            local key = input.askForKey("Search For Key: ")
+            print(vim.inspect(key))
+            return select.findKeyLocationsInViewPort(key)
+        end)
 end
 
 --- Search for multiple characters interactively
@@ -98,12 +99,15 @@ end
 --- @return nil
 function M.selectTreeSitter(returnCursor)
     returnCursor = returnCursor or false
-    executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
-        return treeSitterSearch.getNodeLocations(replacementNodes)
-    end, function(location)
+    executeSearch(
+        function()
+            local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
+            return treeSitterSearch.getNodeLocations(replacementNodes)
+        end,
+        function(location)
             treeSitterSearch.visuallySelectNodeAtLocation({location.lineNum, location.colNum})
-        end, returnCursor)
+        end,
+        returnCursor)
 end
 
 --- Execute command on Tree-sitter node matching search criteria
@@ -112,12 +116,15 @@ end
 --- @return nil
 function M.commandTreeSitter(command, returnCursor)
     returnCursor = returnCursor or true
-    executeSearch(function()
-        local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
-        return treeSitterSearch.getNodeLocations(replacementNodes)
-    end, function(location)
+    executeSearch(
+        function()
+            local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
+            return treeSitterSearch.getNodeLocations(replacementNodes)
+        end,
+        function(location)
             treeSitterSearch.commandNodeAtStartLocation({location.lineNum, location.colNum}, command)
-        end, returnCursor)
+        end,
+        returnCursor)
 end
 
 function M.setup(opts)
