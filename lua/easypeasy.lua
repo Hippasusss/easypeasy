@@ -70,6 +70,29 @@ function M.searchLines()
     executeSearch(select.findAllVisibleLineStarts)
 end
 
+--- Execute CodeCompanion command on selected text
+--- @param returnCursor boolean|nil Whether to return cursor to original position (default: false)
+--- @return nil
+function M.codeCompanionTreeSitter(returnCursor)
+    returnCursor = returnCursor or false
+    if vim.fn.exists(':CodeCompanion') == 0 then
+        vim.notify('CodeCompanion is not installed. Please install it first.', vim.log.levels.WARN)
+        return
+    end
+
+    executeSearch(
+        function()
+            local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
+            return treeSitterSearch.getNodeLocations(replacementNodes)
+        end,
+        function(location)
+            treeSitterSearch.visuallySelectNodeAtLocation({location.lineNum, location.colNum})
+            local keys = vim.api.nvim_replace_termcodes(":CodeCompanion ''<Left>", true, false, true)
+            vim.api.nvim_feedkeys(keys, 'n', false)
+        end,
+        returnCursor)
+end
+
 --- Select Tree-sitter node matching search criteria
 --- @param returnCursor boolean|nil Whether to return cursor to original position (default: false)
 --- @return nil
