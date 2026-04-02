@@ -186,22 +186,44 @@ function M.InteractiveSearch()
         if #matches == 0 then return end
 
         local current_win = vim.api.nvim_get_current_win()
-        local nextMatch = nil
+        local w0 = vim.fn.line('w0', current_win)
+        local ws = vim.fn.line('w$', current_win)
 
         local currentIndex = nil
-        local currentCursor = vim.api.nvim_win_get_cursor(0)
-        for i, match in ipairs(matches) do
-            if match.win == current_win and match[1] == currentCursor[1] and match[2] == (currentCursor[2] + 1) then
+        local cursor = vim.api.nvim_win_get_cursor(current_win)
+        for i, m in ipairs(matches) do
+            if m.win == current_win and m[1] == cursor[1] and m[2] == cursor[2] + 1 then
                 currentIndex = i
                 break
             end
         end
 
-        if currentIndex then
-            local nextIdx = down and (currentIndex % #matches + 1) or ((currentIndex - 2 + #matches) % #matches + 1)
-            nextMatch = matches[nextIdx]
+        local nextMatch = nil
+        if not currentIndex then
+            nextMatch = down and matches[1] or matches[#matches]
         else
-            nextMatch = matches[1]
+            local step = down and 1 or -1
+            local i = currentIndex + step
+
+            while true do
+                if i < 1 then i = #matches end
+                if i > #matches then i = 1 end
+
+                local m = matches[i]
+                local is_visible = (m.win == current_win and m[1] >= w0 and m[1] <= ws)
+
+                if not is_visible then
+                    nextMatch = m
+                    break
+                end
+
+                if i == currentIndex then
+                    local nextIdx = down and (currentIndex % #matches + 1) or ((currentIndex - 2 + #matches) % #matches + 1)
+                    nextMatch = matches[nextIdx]
+                    break
+                end
+                i = i + step
+            end
         end
 
         if nextMatch then
