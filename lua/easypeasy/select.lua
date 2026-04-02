@@ -1,50 +1,55 @@
 local M = {}
 
-function M.getWindowInfo()
+function M.getWindowInfo(win_id)
+    win_id = win_id or vim.api.nvim_get_current_win()
     local windowInfo =
     {
-        win = vim.api.nvim_get_current_win(),
-        buf = vim.api.nvim_get_current_buf(),
-        first_line = vim.fn.line('w0', vim.api.nvim_get_current_win()),
-        last_line = vim.fn.line('w$', vim.api.nvim_get_current_win()),
-        cursor_pos = vim.api.nvim_win_get_cursor(0),
+        win = win_id,
+        buf = vim.api.nvim_win_get_buf(win_id),
+        first_line = vim.fn.line('w0', win_id),
+        last_line = vim.fn.line('w$', win_id),
+        cursor_pos = vim.api.nvim_win_get_cursor(win_id),
     }
     return windowInfo
 end
 
-function M.createJumpLocations(locations)
+function M.createJumpLocations(locations, windowInfo)
     return {
         locations = locations,
-        windowInfo = M.getWindowInfo(),
+        windowInfo = windowInfo or M.getWindowInfo(),
     }
 end
 
 function M.trimLocationsToWindow(jumpLocationInfo)
-    for i, location in ipairs(jumpLocationInfo.locations) do
-        if (location[1] < jumpLocationInfo.windowInfo.first_line) or (location[1] > jumpLocationInfo.windowInfo.last_line) then
-            table.remove(jumpLocationInfo.locations, i)
+    local filtered = {}
+    for _, location in ipairs(jumpLocationInfo.locations) do
+        if (location[1] >= jumpLocationInfo.windowInfo.first_line) and (location[1] <= jumpLocationInfo.windowInfo.last_line) then
+            table.insert(filtered, location)
         end
     end
+    jumpLocationInfo.locations = filtered
     return jumpLocationInfo
 end
 
-function M.findAllVisibleLineStarts()
-    local windowInfo = M.getWindowInfo()
+function M.findAllVisibleLineStarts(win_id)
+    local windowInfo = M.getWindowInfo(win_id)
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local matches = {}
     for linenumber, line in ipairs(lines) do
         if line:match("^%s*$") == nil then
             table.insert(matches, {
                 linenumber + windowInfo.first_line - 1,
-                1
+                1,
+                win = windowInfo.win,
+                buf = windowInfo.buf
             })
         end
     end
     return matches
 end
 
-function M.findKeyLocationsInViewPort(key)
-    local windowInfo = M.getWindowInfo()
+function M.findKeyLocationsInViewPort(key, win_id)
+    local windowInfo = M.getWindowInfo(win_id)
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
     local matches = {}
 
@@ -55,7 +60,9 @@ function M.findKeyLocationsInViewPort(key)
                 table.insert(matches,
                     {
                         linenumber + windowInfo.first_line - 1,
-                        charColNum
+                        charColNum,
+                        win = windowInfo.win,
+                        buf = windowInfo.buf
                     })
             end
         end

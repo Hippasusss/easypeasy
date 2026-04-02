@@ -1,8 +1,16 @@
 local highlight = require("easypeasy.highlight")
 local M = {}
+
+local function performJump(location)
+    if location.win and location.win ~= vim.api.nvim_get_current_win() then
+        vim.api.nvim_set_current_win(location.win)
+    end
+    vim.api.nvim_win_set_cursor(0, {location.lineNum, location.colNum - 1})
+end
+
 function M.jumpToKey(jumpLocationInfo)
     if #jumpLocationInfo.locations == 1 then
-        vim.api.nvim_win_set_cursor(0, {jumpLocationInfo.locations[1].lineNum, jumpLocationInfo.locations[1].colNum - 1})
+        performJump(jumpLocationInfo.locations[1])
         return jumpLocationInfo.locations[1]
     end
 
@@ -13,7 +21,7 @@ function M.jumpToKey(jumpLocationInfo)
     for _, location in ipairs(jumpLocationInfo.locations) do
         if string.sub(location.replacementString, 1, 1) == key then
             if (string.len(location.replacementString) == 1) then
-                vim.api.nvim_win_set_cursor(0, {location.lineNum, location.colNum - 1})
+                performJump(location)
                 return location
             else
                 location.replacementString = string.sub(location.replacementString, 2)
@@ -25,7 +33,7 @@ function M.jumpToKey(jumpLocationInfo)
     jumpLocationInfo.numMatches = #filteredLocations
 
     if #filteredLocations == 1 and string.len(filteredLocations[1].replacementString) == 0 then
-        vim.api.nvim_win_set_cursor(0, {filteredLocations[1].lineNum, filteredLocations[1].colNum - 1})
+        performJump(filteredLocations[1])
         return filteredLocations[1]
     elseif #filteredLocations > 0 then
         highlight.clearHighlights()
@@ -33,4 +41,5 @@ function M.jumpToKey(jumpLocationInfo)
         return M.jumpToKey(jumpLocationInfo)
     end
 end
+
 return M

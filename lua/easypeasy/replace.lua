@@ -23,15 +23,11 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
 
     local replacementStrings = M.generateReplacementStrings(#jumpLocationInfo.locations)
     for i, location in ipairs(jumpLocationInfo.locations) do
-        local lineNum = location[1]
-        local colNum = location[2]
-
-        table.insert(replacementChars,
-            {
-                lineNum = lineNum,
-                colNum = colNum,
-                replacementString = replacementStrings[i]
-            })
+        local loc = vim.deepcopy(location)
+        loc.lineNum = location[1]
+        loc.colNum = location[2]
+        loc.replacementString = replacementStrings[i]
+        table.insert(replacementChars, loc)
     end
     jumpLocationInfo.locations = replacementChars
     return jumpLocationInfo

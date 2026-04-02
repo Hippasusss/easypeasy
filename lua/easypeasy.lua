@@ -15,17 +15,17 @@ local M = {}
 local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
     highlight.toggle_grey_text()
 
-    restore_cursor = false or restore_cursor
+    restore_cursor = restore_cursor or false
     local scrolloff = vim.opt.scrolloff
     if restore_cursor then vim.opt.scrolloff = 0 end
     local original_pos = vim.api.nvim_win_get_cursor(0)
+    local original_win = vim.api.nvim_get_current_win()
 
     local success, replacementLocations = pcall(getLocationsFn)
 
     local ok, err = pcall(function()
         if success and replacementLocations then
             local bufferJumplocations = select.createJumpLocations(replacementLocations)
-            bufferJumplocations = select.trimLocationsToWindow(bufferJumplocations)
             local replacementLocationsWithCharacters = replace.calculateReplacementCharacters(bufferJumplocations)
 
             if replacementLocationsWithCharacters then
@@ -40,9 +40,9 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
 
     -- return the cursor if requested or if the user escapes mid search
     if (restore_cursor and original_pos) or (replacementLocations == nil) then
-        print("here")
         vim.opt.scrolloff = scrolloff
-        pcall(vim.api.nvim_win_set_cursor, 0, original_pos)
+        pcall(vim.api.nvim_set_current_win, original_win)
+        pcall(vim.api.nvim_win_set_cursor, original_win, original_pos)
     end
     highlight.toggle_grey_text()
     if not ok then return err end
@@ -54,8 +54,20 @@ function M.searchSingleCharacter()
     executeSearch(
         function()
             local key = input.askForKey("Search For Key: ")
-            print(vim.inspect(key))
-            return select.findKeyLocationsInViewPort(key)
+            if not key then return nil end
+            local wins = {vim.api.nvim_get_current_win()}
+            if config.options.multiWindowSupport then
+                wins = vim.api.nvim_tabpage_list_wins(0)
+            end
+
+            local allMatches = {}
+            for _, win in ipairs(wins) do
+                local win_matches = select.findKeyLocationsInViewPort(key, win)
+                for _, match in ipairs(win_matches) do
+                    table.insert(allMatches, match)
+                end
+            end
+            return allMatches
         end)
 end
 
@@ -68,7 +80,22 @@ end
 --- Search for all visible line starts
 --- @return nil
 function M.searchLines()
-    executeSearch(select.findAllVisibleLineStarts)
+    executeSearch(
+        function()
+            local wins = {vim.api.nvim_get_current_win()}
+            if config.options.multiWindowSupport then
+                wins = vim.api.nvim_tabpage_list_wins(0)
+            end
+
+            local allMatches = {}
+            for _, win in ipairs(wins) do
+                local win_matches = select.findAllVisibleLineStarts(win)
+                for _, match in ipairs(win_matches) do
+                    table.insert(allMatches, match)
+                end
+            end
+            return allMatches
+        end)
 end
 
 --- Execute CodeCompanion command on selected text
@@ -80,14 +107,25 @@ function M.codeCompanionTreeSitter(returnCursor)
         vim.notify('CodeCompanion is not installed. Please install it first.', vim.log.levels.WARN)
         return
     end
-
     executeSearch(
         function()
-            local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
-            return treeSitterSearch.getNodeLocations(replacementNodes)
+            local wins = {vim.api.nvim_get_current_win()}
+            if config.options.multiWindowSupport then
+                wins = vim.api.nvim_tabpage_list_wins(0)
+            end
+
+            local allMatches = {}
+            for _, win in ipairs(wins) do
+                local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter, win)
+                local win_matches = treeSitterSearch.getNodeLocations(replacementNodes, win)
+                for _, match in ipairs(win_matches) do
+                    table.insert(allMatches, match)
+                end
+            end
+            return allMatches
         end,
         function(location)
-            treeSitterSearch.visuallySelectNodeAtLocation({location.lineNum, location.colNum})
+            treeSitterSearch.visuallySelectNodeAtLocation(location)
             local keys = vim.api.nvim_replace_termcodes(":CodeCompanion ''<Left>", true, false, true)
             vim.api.nvim_feedkeys(keys, 'n', false)
         end,
@@ -101,11 +139,23 @@ function M.selectTreeSitter(returnCursor)
     returnCursor = returnCursor or false
     executeSearch(
         function()
-            local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
-            return treeSitterSearch.getNodeLocations(replacementNodes)
+            local wins = {vim.api.nvim_get_current_win()}
+            if config.options.multiWindowSupport then
+                wins = vim.api.nvim_tabpage_list_wins(0)
+            end
+
+            local allMatches = {}
+            for _, win in ipairs(wins) do
+                local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter, win)
+                local win_matches = treeSitterSearch.getNodeLocations(replacementNodes, win)
+                for _, match in ipairs(win_matches) do
+                    table.insert(allMatches, match)
+                end
+            end
+            return allMatches
         end,
         function(location)
-            treeSitterSearch.visuallySelectNodeAtLocation({location.lineNum, location.colNum})
+            treeSitterSearch.visuallySelectNodeAtLocation(location)
         end,
         returnCursor)
 end
@@ -118,11 +168,23 @@ function M.commandTreeSitter(command, returnCursor)
     returnCursor = returnCursor or true
     executeSearch(
         function()
-            local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter)
-            return treeSitterSearch.getNodeLocations(replacementNodes)
+            local wins = {vim.api.nvim_get_current_win()}
+            if config.options.multiWindowSupport then
+                wins = vim.api.nvim_tabpage_list_wins(0)
+            end
+
+            local allMatches = {}
+            for _, win in ipairs(wins) do
+                local replacementNodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter, win)
+                local win_matches = treeSitterSearch.getNodeLocations(replacementNodes, win)
+                for _, match in ipairs(win_matches) do
+                    table.insert(allMatches, match)
+                end
+            end
+            return allMatches
         end,
         function(location)
-            treeSitterSearch.commandNodeAtStartLocation({location.lineNum, location.colNum}, command)
+            treeSitterSearch.commandNodeAtStartLocation(location, command)
         end,
         returnCursor)
 end
