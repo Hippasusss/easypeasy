@@ -32,6 +32,8 @@ local default_options = {
         "method_declaration",
         "method_definition",
         "method_declaration",
+        "operator_declaration",
+        "constructor_declaration",
         "function_declaration",
         "function_call",
         "arrow_function",
