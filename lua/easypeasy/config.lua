@@ -49,7 +49,11 @@ local default_options = {
         "template_declaration",
         "return_statement",
         "declaration",
+        "list_item",
+        "paragraph",
+        "section",
     },
+
     fadedKeyColor = '#808080',
     primarySelectorKeyColor = '#D6281C',
     secondarySelectorKeyColor = '#fc8b98',
