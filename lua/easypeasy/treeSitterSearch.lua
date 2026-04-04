@@ -1,37 +1,36 @@
 local config = require("easypeasy.config")
 local M = {}
 
---- Parse a buffer and return its root tree-sitter node.
---- @param buf integer|nil Buffer handle, defaults to current buffer
---- @return TSNode|nil root Root node for the first parsed tree
-local function getRootNode(buf)
-    buf = buf or vim.api.nvim_get_current_buf()
-    local ok, parser = pcall(vim.treesitter.get_parser, buf)
-    if not ok or not parser then return nil end
-    local tree = parser:parse()[1]
-    return tree:root()
-end
-
-function M.getTSNodeLocations(filter_types, win)
+-- Get locations of Tree-sitter nodes matching specified types in the given window.
+-- @param filter_types table|nil Optional list of node types to filter by.
+-- @param win integer|nil Window ID (defaults to current window).
+-- @return table List of node locations, each with fields: startRow, startCol, win, buf, nodeRange.
+-- Locations are deduplicated by start position, keeping the node with the largest range.
+function M.getTSNodeLocations(filterTypes, win)
     win = win or vim.api.nvim_get_current_win()
     local buf = vim.api.nvim_win_get_buf(win)
-    local root = getRootNode(buf)
+
+    -- Inlined getRootNode logic
+    local ok, parser = pcall(vim.treesitter.get_parser, buf)
+    if not ok or not parser then return {} end
+    local tree = parser:parse()[1]
+    local root = tree:root()
     if not root then return {} end
 
     local locations = {}
-    local filter_set = filter_types and #filter_types > 0
-        and vim.iter(filter_types):fold({}, function(acc, v) acc[v] = true return acc end)
+    local filterSet = filterTypes and #filterTypes > 0
+        and vim.iter(filterTypes):fold({}, function(acc, v) acc[v] = true return acc end)
 
     local function traverse(node)
-        if not filter_set or filter_set[node:type()] then
-            local s_row, s_col, e_row, e_col = node:range()
-            table.insert(locations, {
-                s_row + 1,
-                s_col + 1,
-                win = win,
-                buf = buf,
-                nodeRange = { s_row + 1, s_col, e_row + 1, e_col },
-            })
+        if not filterSet or filterSet[node:type()] then
+            local startRow, startCol, endRow, endCol = node:range()
+            local location = { startRow + 1, startCol + 1, win = win, buf = buf, nodeRange = { startRow + 1, startCol, endRow + 1, endCol }, }
+            local key = string.format("%d:%d", location[1], location[2])
+            local existing = locations[key]
+
+            if not existing or location.nodeRange[3] > existing.nodeRange[3] or (location.nodeRange[3] == existing.nodeRange[3] and location.nodeRange[4] > existing.nodeRange[4]) then
+                locations[key] = location
+            end
         end
 
         for child in node:iter_children() do
@@ -40,6 +39,11 @@ function M.getTSNodeLocations(filter_types, win)
     end
 
     traverse(root)
+    locations = vim.tbl_values(locations)
+    table.sort(locations, function(a, b)
+        if a[1] ~= b[1] then return a[1] < b[1] end
+        return a[2] < b[2]
+    end)
     return locations
 end
 
