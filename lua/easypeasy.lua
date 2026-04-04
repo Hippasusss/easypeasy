@@ -11,7 +11,7 @@ local M = {}
 --- Gather matches across all visible windows
 --- @param matchFn function Function that returns matches for a specific window
 --- @return table List of all matches
-local function gatherMatchesAcrossWindows(matchFn)
+local function getMatchesAcrossAllWindows(matchFn)
     local allMatches = {}
     local windows = {}
     if config.options.multiWindowSupport then
@@ -51,6 +51,7 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
 
             if replacementLocationsWithCharacters then
                 local key = highlight.highlightJumpLocations(replacementLocationsWithCharacters)
+                if not key then return end
                 local location = jump.jumpToKey(key)
                 if postProcessFn then postProcessFn(location) end
             end
@@ -77,7 +78,7 @@ function M.searchSingleCharacter()
         function()
             local key = input.askForKey("Search For Key: ")
             if not key then return nil end
-            return gatherMatchesAcrossWindows(
+            return getMatchesAcrossAllWindows(
                 function(win)
                     return select.findKeyLocationsInViewPort(key, win)
                 end)
@@ -95,7 +96,7 @@ end
 function M.searchLines()
     executeSearch(
         function()
-            return gatherMatchesAcrossWindows(select.findAllVisibleLineStarts)
+            return getMatchesAcrossAllWindows(select.findAllVisibleLineStarts)
         end)
 end
 
@@ -105,7 +106,7 @@ end
 local function treeSitterSearchCommon(postProcess, restore_cursor)
     executeSearch(
         function()
-            return gatherMatchesAcrossWindows(
+            return getMatchesAcrossAllWindows(
                 function(win)
                     return treeSitterSearch.getTSNodeLocations(config.options.treesitterSearchFilter, win)
                 end)
