@@ -1,5 +1,8 @@
 local M = {}
 
+--- Collect viewport and cursor information for a window.
+--- @param win_id integer|nil Window handle, defaults to current window
+--- @return table windowInfo Window id, buffer id, visible bounds, and cursor position
 function M.getWindowInfo(win_id)
     win_id = win_id or vim.api.nvim_get_current_win()
     local windowInfo =
@@ -13,6 +16,10 @@ function M.getWindowInfo(win_id)
     return windowInfo
 end
 
+--- Bundle raw jump locations with window metadata.
+--- @param locations table Candidate jump positions
+--- @param windowInfo table|nil Precomputed window metadata
+--- @return table jumpLocationInfo Combined jump context
 function M.createJumpLocations(locations, windowInfo)
     return {
         locations = locations,
@@ -20,6 +27,9 @@ function M.createJumpLocations(locations, windowInfo)
     }
 end
 
+--- Remove jump targets that are outside the visible window region.
+--- @param jumpLocationInfo table Jump targets and associated window metadata
+--- @return table jumpLocationInfo Filtered jump context
 function M.trimLocationsToWindow(jumpLocationInfo)
     local filtered = {}
     for _, location in ipairs(jumpLocationInfo.locations) do
@@ -31,6 +41,9 @@ function M.trimLocationsToWindow(jumpLocationInfo)
     return jumpLocationInfo
 end
 
+--- Find the first non-blank character position for each visible line.
+--- @param win_id integer|nil Window handle, defaults to current window
+--- @return table matches Jump targets for visible non-empty lines
 function M.findAllVisibleLineStarts(win_id)
     local windowInfo = M.getWindowInfo(win_id)
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)
@@ -48,6 +61,10 @@ function M.findAllVisibleLineStarts(win_id)
     return matches
 end
 
+--- Find all visible occurrences of a single character in the viewport.
+--- @param key string Character to search for
+--- @param win_id integer|nil Window handle, defaults to current window
+--- @return table matches Jump targets for matching characters
 function M.findKeyLocationsInViewPort(key, win_id)
     local windowInfo = M.getWindowInfo(win_id)
     local lines = vim.api.nvim_buf_get_lines(windowInfo.buf, windowInfo.first_line - 1, windowInfo.last_line, false)

@@ -1,4 +1,5 @@
-
+--- Print raw getchar values to help inspect key handling in Neovim.
+--- @return nil
 function DebugBackspace()
   print("Press backspace (then Escape to exit)")
   while true do

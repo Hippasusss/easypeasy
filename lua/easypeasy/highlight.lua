@@ -10,6 +10,9 @@ local EXCLUDE_GROUPS = {
 }
 local colorNameSpace = vim.api.nvim_create_namespace('easypeasy')
 
+--- Draw overlay labels for each jump target.
+--- @param jumpLocationInfo table Jump targets with assigned replacement strings
+--- @return table|nil jumpLocationInfo The same jump info when locations exist
 function M.highlightJumpLocations(jumpLocationInfo)
     if #jumpLocationInfo.locations == 0 then return end
 
@@ -55,6 +58,8 @@ function M.highlightJumpLocations(jumpLocationInfo)
     return jumpLocationInfo
 end
 
+--- Toggle the dimmed-text effect used while jump labels are active.
+--- @return nil
 function M.toggle_grey_text()
     if next(originalHL) == nil then
         for _, name in ipairs(vim.fn.getcompletion('', 'highlight')) do
@@ -90,6 +95,9 @@ function M.toggle_grey_text()
     M.forceDraw()
 end
 
+--- Request a screen redraw immediately or on the next scheduler tick.
+--- @param immediate boolean|nil When true, redraw synchronously
+--- @return nil
 function M.forceDraw(immediate)
     immediate = immediate or 0
     if immediate then
@@ -99,6 +107,9 @@ function M.forceDraw(immediate)
     end
 end
 
+--- Clear all jump-related highlights from one buffer or every loaded buffer.
+--- @param buf integer|nil Buffer handle to clear, or nil for all loaded buffers
+--- @return nil
 function M.clearHighlights(buf)
     if buf then
         vim.api.nvim_buf_clear_namespace(buf, colorNameSpace, 0, -1)
@@ -111,10 +122,14 @@ function M.clearHighlights(buf)
     end
 end
 
+--- Run the interactive multi-character search UI and return all matches.
+--- @return table|nil matches Search matches, or nil when cancelled
 function M.InteractiveSearch()
     local query = ''
     local matches = {}
 
+    --- Recompute search matches and highlight them for the current query.
+    --- @return nil
     local function updateMatches()
         M.clearHighlights()
         matches = {}
@@ -163,6 +178,8 @@ function M.InteractiveSearch()
         end
     end
 
+    --- Jump to the first match if the current window has no visible result.
+    --- @return nil
     local function jumpIfNoMatchesInWindow()
         if #matches == 0 then return end
 
@@ -182,6 +199,9 @@ function M.InteractiveSearch()
         vim.api.nvim_win_set_cursor(0, {matches[1][1], matches[1][2] - 1})
     end
 
+    --- Cycle forward or backward through search matches with tab keys.
+    --- @param down boolean When true, cycle forward; otherwise backward
+    --- @return nil
     local function handleTab(down)
         if #matches == 0 then return end
 
@@ -236,6 +256,8 @@ function M.InteractiveSearch()
 
     M.clearHighlights()
 
+    --- Refresh the command-line prompt showing the current search query.
+    --- @return nil
     local function redrawPrompt()
         vim.api.nvim_echo({{'Search: '..query, 'EasyPeasySearch'}}, false, {})
         M.forceDraw(true)

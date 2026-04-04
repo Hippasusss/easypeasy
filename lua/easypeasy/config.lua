@@ -65,6 +65,9 @@ local default_options = {
 
 M.options = {}
 
+--- Merge user options with defaults and apply plugin highlight groups.
+--- @param opts table|nil User configuration overrides
+--- @return table options Effective configuration table
 function M.setAllOptions(opts)
     M.options = vim.tbl_deep_extend("force", default_options, opts or {})
 

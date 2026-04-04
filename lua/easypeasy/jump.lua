@@ -1,6 +1,9 @@
 local highlight = require("easypeasy.highlight")
 local M = {}
 
+--- Move the cursor to the selected jump target, switching windows if needed.
+--- @param location table Jump target containing window and cursor coordinates
+--- @return nil
 local function performJump(location)
     if location.win and location.win ~= vim.api.nvim_get_current_win() then
         vim.api.nvim_set_current_win(location.win)
@@ -8,6 +11,9 @@ local function performJump(location)
     vim.api.nvim_win_set_cursor(0, {location.lineNum, location.colNum - 1})
 end
 
+--- Resolve a highlighted jump label into a final jump target.
+--- @param jumpLocationInfo table Highlighted jump targets and window metadata
+--- @return table|nil location Selected target, if any
 function M.jumpToKey(jumpLocationInfo)
     if #jumpLocationInfo.locations == 1 then
         performJump(jumpLocationInfo.locations[1])

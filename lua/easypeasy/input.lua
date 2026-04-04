@@ -1,5 +1,8 @@
 local M = {}
 
+--- Prompt for a single keypress and return it as a string.
+--- @param message string Prompt text shown in the command area
+--- @return string key Pressed key as text
 function M.askForKey(message)
     vim.api.nvim_echo({{message, 'EasyPeasySearch'}}, false, {})
     local char = vim.fn.getchar()

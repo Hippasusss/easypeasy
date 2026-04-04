@@ -2,6 +2,9 @@ local config = require("easypeasy.config")
 
 local M = {}
 
+--- Attach replacement label strings to each jump target.
+--- @param jumpLocationInfo table Jump targets and current window context
+--- @return table|nil jumpLocationInfo Updated jump data with replacement strings
 function M.calculateReplacementCharacters(jumpLocationInfo)
     if jumpLocationInfo == nil then return nil end
 
@@ -33,7 +36,13 @@ function M.calculateReplacementCharacters(jumpLocationInfo)
     return jumpLocationInfo
 end
 
+--- Build the label sequence used to identify jump targets.
+--- @param numMatches integer Number of jump targets that need labels
+--- @return table replacements Ordered replacement strings
 function M.generateReplacementStrings(numMatches)
+    --- Recursively distribute labels across prefix groups.
+    --- @param targets integer Number of labels needed in this subtree
+    --- @return table groups Allocation tree keyed by selector character
     local function buildTree(targets)
         local groups, counts = {}, {}
         for i = 1, #config.options.characterMap do counts[i] = 0 end
@@ -63,6 +72,10 @@ function M.generateReplacementStrings(numMatches)
     end
 
     local replacements = {}
+    --- Flatten the allocation tree into ordered replacement strings.
+    --- @param tree table Allocation tree produced by buildTree
+    --- @param prefix string|nil Prefix accumulated so far
+    --- @return nil
     local function flatten(tree, prefix)
         prefix = prefix or ""
         for _, char in ipairs(config.options.characterMap) do

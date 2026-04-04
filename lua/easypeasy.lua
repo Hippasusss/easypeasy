@@ -154,6 +154,9 @@ function M.commandTreeSitter(command, returnCursor)
         end, returnCursor or true)
 end
 
+--- Apply user configuration and initialize highlight groups.
+--- @param opts table|nil User configuration overrides
+--- @return nil
 function M.setup(opts)
     config.setAllOptions(opts)
 end
