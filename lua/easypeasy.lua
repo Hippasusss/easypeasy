@@ -61,7 +61,6 @@ local function executeSearch(getLocationsFn, postProcessFn, restore_cursor)
         end
     end)
 
-    -- return the cursor if requested or if the user escapes mid search
     if (restore_cursor and original_pos) or (replacementLocations == nil) then
         vim.opt.scrolloff = scrolloff
         pcall(vim.api.nvim_set_current_win, original_win)
@@ -108,8 +107,7 @@ local function treeSitterSearchCommon(postProcess, restore_cursor)
         function()
             return gatherMatchesAcrossWindows(
                 function(win)
-                    local nodes = treeSitterSearch.searchTreeSitterRecurse(config.options.treesitterSearchFilter, win)
-                    return treeSitterSearch.getNodeLocations(nodes, win)
+                    return treeSitterSearch.getTSNodeLocations(config.options.treesitterSearchFilter, win)
                 end)
         end,
         postProcess,
