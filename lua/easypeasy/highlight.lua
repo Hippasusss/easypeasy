@@ -14,12 +14,14 @@ local colorNameSpace = vim.api.nvim_create_namespace('easypeasy')
 --- @param jumpLocationInfo table Jump targets with assigned replacement strings
 --- @return table|nil jumpLocationInfo The same jump info when locations exist
 function M.highlightJumpLocations(jumpLocationInfo)
-    if #jumpLocationInfo.locations == 0 then return end
+    if not jumpLocationInfo then return end
 
     for _, location in pairs(jumpLocationInfo.locations) do
         local buf = location.buf or jumpLocationInfo.buffer or 0
         local absLinenum = location.lineNum
         local charNumber = location.colNum
+        local line = vim.api.nvim_buf_get_lines(buf, absLinenum - 1, absLinenum, false)[1] or ""
+        local maxOverlayCol = #line
         local replacementString = location.replacementString
         local firstChar = replacementString:sub(1, 1)
         local restChars = replacementString:sub(2, 2)
@@ -38,7 +40,7 @@ function M.highlightJumpLocations(jumpLocationInfo)
             }
         )
 
-        if #restChars > 0 then
+        if #restChars > 0 and charNumber <= maxOverlayCol then
             vim.api.nvim_buf_set_extmark(
                 buf,
                 colorNameSpace,
@@ -99,7 +101,7 @@ end
 --- @param immediate boolean|nil When true, redraw synchronously
 --- @return nil
 function M.forceDraw(immediate)
-    immediate = immediate or 0
+    immediate = immediate or false
     if immediate then
         vim.cmd("redraw")
     else
