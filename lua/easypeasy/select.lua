@@ -27,19 +27,6 @@ function M.createJumpLocations(locations, windowInfo)
     }
 end
 
---- Remove jump targets that are outside the visible window region.
---- @param jumpLocationInfo table Jump targets and associated window metadata
---- @return table jumpLocationInfo Filtered jump context
-function M.trimLocationsToWindow(jumpLocationInfo)
-    local filtered = {}
-    for _, location in ipairs(jumpLocationInfo.locations) do
-        if (location[1] >= jumpLocationInfo.windowInfo.first_line) and (location[1] <= jumpLocationInfo.windowInfo.last_line) then
-            table.insert(filtered, location)
-        end
-    end
-    jumpLocationInfo.locations = filtered
-    return jumpLocationInfo
-end
 
 --- Find the first non-blank character position for each visible line.
 --- @param win_id integer|nil Window handle, defaults to current window
