@@ -21,6 +21,7 @@ local default_options = {
         "if",
         "switch_statement",
         "switch",
+        "foreach_statement",
         "for_statement",
         "for_loop",
         "for",
@@ -45,6 +46,7 @@ local default_options = {
         "class_declaration",
         "variable_declaration",
         "field_declaration",
+        "property_declaration",
         "field",
         "declaration",
         -- Statements and expressions
